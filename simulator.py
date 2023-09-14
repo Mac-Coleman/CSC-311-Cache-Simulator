@@ -9,7 +9,7 @@ def simulator(max_size:int, page_size:int, cache_size:int, map_algorithm, set_si
     for i in reads:
         address=address_maker.generate_address(max_size)
         hit=None#cache.read(address)
-        #outputbuilder.append(hit)
+        #outputbuilder.add(hit,i)
         if(hit):
             hit_counter+=1
         total_counter+=1
