@@ -7,14 +7,33 @@ from cli_parser import parse_arguments
 
 import sys
 
+program_name = "CacheSim"
+version = "0.0.1"
+
+# fdisk is a good example of a help message.
+help_string = f"\n{program_name} {version}\n\n" \
+    "Usage:\n" \
+    "  python {executing_file_name} [options] <cache-type> <reads>\n\n" \
+    "Simulate reads and writes to a cache.\n\n" \
+    "Options:\n" \
+    " -b, --block-size <size>  block, page, frame, line size\n" \
+    "                          default: 4KB\n" \
+    " -c, --cache-size <size>  size of the cache\n" \
+    "                          default: 32KB\n" \
+    " -h, --help               display this help message\n" \
+    " -m, --memory-size <size> physical memory size\n" \
+    "                          default: 256MB\n" \
+    " -v, --version            display version\n" \
+    
+
 def main():
     parse_arguments(sys.argv, run_help, run_version, run_simulator)
 
 def run_version(executing_file: str):
-    print("Version")
+    print(f"{program_name} {version}")
 
 def run_help(executing_file: str):
-    print("Help")
+    print(help_string.format(executing_file_name=executing_file))
 
 def run_simulator(options: dict[str, int]):
     print("Simulator")
