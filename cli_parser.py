@@ -1,4 +1,5 @@
 from enum import Enum
+import sys
 
 class OptionFormat(Enum):
     COMBINED_SHORT = 0
@@ -20,11 +21,19 @@ def parse_arguments(args: list[str]):
 
     consumed = [False for element in range(len(args))]
     # Makes a list of bools to mark options as consumed.
+    consumed[0] = True
 
-    print("Memory size:", get_option_value(args, consumed, "--memory-size", "-m"))
-    print("Block size:", get_option_value(args, consumed, "--block-size", "-b"))
-    print("Cache size:", get_option_value(args, consumed, "--cache-size", "-c"))
-    print("Reads:", get_option_value(args, consumed, "--reads", "-r"))
+    memory_size = "256MB"
+    block_size = "4KB"
+    cache_size = "32KB"
+
+    memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
+    block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
+    cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
+
+    print(memory_size_parsed, block_size_parsed, cache_size_parsed)
+
+    check_unconsumed(args, consumed)
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
     
@@ -52,6 +61,9 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     if not option_style:
         return None # The option is not present.
     
+    if consumed[option_style[1]]:
+        return None # This is already consumed. (Incorrect, but we will deal with that in other ways.)
+    
     if option_style[0] == OptionFormat.COMBINED_SHORT:
         # The arguments are in the same element of the args list.
 
@@ -69,7 +81,9 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     if index >= len(args):
         raise ValueError(f"Option {option_style[1]} was given but no value was specified.")
     
-    args[index]
+    if consumed[index]:
+        return None
+
     consumed[option_style[1]] = True
     consumed[index] = True
     return args[index]
@@ -85,3 +99,17 @@ def get_option_index(args: list[str], long: str, short: str) -> tuple[OptionForm
             return (type, index)
     
     return None
+
+def check_unconsumed(args: list[str], consumed: list[bool]):
+    unconsumed: list[str] = []
+
+    for (index, value) in enumerate(consumed):
+        if not value:
+            unconsumed.append(args[index])
+    
+    if len(unconsumed) > 0:
+        print("Error: Unrecognized command line arguments.")
+        print("The following command line inputs could not be interpreted: ", end=None)
+
+        print(str(unconsumed)[1:-1])
+        sys.exit(1)
