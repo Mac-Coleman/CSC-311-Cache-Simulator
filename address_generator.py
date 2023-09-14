@@ -1,6 +1,6 @@
 import random
 
-class address_generator:
+class AddressGenerator:
     def __init__(self,ms:int):
         self.max_size=ms
     def generate_address(self):
