@@ -36,7 +36,7 @@ def run_help(executing_file: str):
     print(help_string.format(executing_file_name=executing_file))
 
 def run_simulator(options: dict[str, int]):
-    print("Simulator")
+    print(options)
 
 
 if __name__ == "__main__":

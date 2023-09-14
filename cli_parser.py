@@ -156,7 +156,7 @@ def str_to_size(string: str) -> int:
 
     suffix_start: int = 0
 
-    while string[suffix_start] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+    while suffix_start < len(string) and string[suffix_start] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
         suffix_start += 1
     
     value = int(string[:suffix_start])
