@@ -29,13 +29,15 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     cache_size = "32KB"
 
     run_help = get_flag_presence(args, consumed, "--help", "-h")
-    run_version = get_flag_presence(args, consumed, "--version", "--v")
+    run_version = get_flag_presence(args, consumed, "--version", "-v")
 
     if run_help:
         help_handler(file_name)
+        return
     
     if run_version:
         version_handler(file_name)
+        return
 
 
     memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
@@ -62,16 +64,16 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
     
-    long_index = args.index(long)
-    short_index = args.index(short)
 
-    if long_index >= 0:
+    if long in args and (long_index := args.index(long)):
         consumed[long_index] = True
+        return True
     
-    if short_index >= 0:
+    if short in args and (short_index := args.index(short)):
         consumed[short_index] = True
+        return True
     
-    return long_index >= 0 or short_index >= 0
+    return False
 
 def get_option_value(args: list[str], consumed: list[bool], long: str, short: str) -> None | str:
     """
