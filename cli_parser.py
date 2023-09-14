@@ -109,7 +109,7 @@ def check_unconsumed(args: list[str], consumed: list[bool]):
     
     if len(unconsumed) > 0:
         print("Error: Unrecognized command line arguments.")
-        print("The following command line inputs could not be interpreted: ", end=None)
-
+        print("The following command line inputs could not be interpreted: ", end="")
         print(str(unconsumed)[1:-1])
+        print(f"Run 'python {args[0]} --help' to learn more.")
         sys.exit(1)
