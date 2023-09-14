@@ -1,5 +1,6 @@
 from enum import Enum
 import sys
+from typing import Callable
 
 class OptionFormat(Enum):
     COMBINED_SHORT = 0
@@ -7,8 +8,7 @@ class OptionFormat(Enum):
     SEPARATE_SHORT = 2
     SEPARATE_LONG = 3
 
-def parse_arguments(args: list[str]):
-    file_name = args[0]
+def parse_arguments(args: list[str], help_handler: Callable, version_handler: Callable, run_handler: Callable):
 
     # Positional:
     #   Cache Type
@@ -21,11 +21,22 @@ def parse_arguments(args: list[str]):
 
     consumed = [False for element in range(len(args))]
     # Makes a list of bools to mark options as consumed.
+    file_name = args[0]
     consumed[0] = True
 
     memory_size = "256MB"
     block_size = "4KB"
     cache_size = "32KB"
+
+    run_help = get_flag_presence(args, consumed, "--help", "-h")
+    run_version = get_flag_presence(args, consumed, "--version", "--v")
+
+    if run_help:
+        help_handler(file_name)
+    
+    if run_version:
+        version_handler(file_name)
+
 
     memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
     block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
@@ -42,9 +53,12 @@ def parse_arguments(args: list[str]):
 
     check_unconsumed(args, consumed)
 
-    print("Memory:", str_to_size(memory_size))
-    print("Block:", str_to_size(block_size))
-    print("Cache:", str_to_size(cache_size))
+    options: dict[str, int] = {
+        "memory_size": str_to_size(memory_size),
+        "block_size": str_to_size(block_size),
+        "cache_size": str_to_size(cache_size),
+    }
+    run_handler(options)
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
     
