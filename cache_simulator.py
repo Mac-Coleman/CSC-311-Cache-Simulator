@@ -40,9 +40,9 @@ def run_help(executing_file: str):
 def run_simulator(options: dict[str, int]):
     print(options)
 
-    cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], 1)
+    cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], options["k"])
 
-    for i in range(1000):
+    for i in range(options["reads"]):
         address = random.randint(0, options["memory_size"])
         print(f"A: {address:x}, hit: {cache.read(address)}")
 

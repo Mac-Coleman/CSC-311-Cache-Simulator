@@ -1,6 +1,6 @@
 from enum import Enum
 import sys
-from typing import Callable
+from typing import cast, Callable
 
 class OptionFormat(Enum):
     COMBINED_SHORT = 0
@@ -43,6 +43,28 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
     block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
     cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
+    k_parsed = get_option_value(args, consumed, "--ways", "-k")
+
+    # Unconsumed arguments are positionals.
+    positionals: list[str] = []
+
+    count = 0
+    for i in range(len(args)):
+        if not consumed[i]:
+            positionals.append(args[i])
+        
+            if count < 2:
+                consumed[i] = True
+                count += 1
+    
+    if len(positionals) != 2:
+        print("Error: Cache simulator requires exactly two positional arguments.\n")
+        print("Arguments:")
+        print("\tTYPE    The type of cache mapping to use.")
+        print("\tREADS   The number of reads to perform.")
+        sys.exit(1)
+
+
 
     if memory_size_parsed:
         memory_size = memory_size_parsed
@@ -53,12 +75,62 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     if cache_size_parsed:
         cache_size = cache_size_parsed
 
+    cache_type = positionals[0].lower()
+    reads = str_to_size(positionals[1])
+
+    lines = (str_to_size(cache_size) // str_to_size(block_size))
+
+    k_dict: dict[str, int | None] = {
+        "direct": 1,
+        "d": 1,
+        "1": 1,
+        "associative": lines,
+        "a": lines,
+        "2": lines,
+        "set-associative": None,
+        "set_associative": None,
+        "s": None,
+        "3": None
+    }
+
+    k = None
+    try:
+        k = k_dict[cache_type]
+    except KeyError:
+        print(f"Error: Unrecognized cache type: {cache_type}\n")
+        print("Cache types:")
+        print("\tdirect")
+        print("\tassociative")
+        print("\tset-associative")
+        sys.exit(1)
+
+    if not k and k_parsed is None:
+        print("Error: You must specify the set size when using a set-associative cache.")
+        print(f"You can do so by running: python {file_name} set-associative -ways <set-size> reads")
+        sys.exit(1)
+    
+    if not k and k_parsed is not None:
+        try:
+            k = int(k_parsed)
+        except ValueError:
+            print(f"Error: Could not interpret value for k: {k_parsed}")
+            sys.exit(1)
+    
+    if k is not None and k_parsed is not None:
+        print("Error: Set size can not be specified when using a direct or associative mapping!")
+        sys.exit(1)
+    
+    if k is not None and k <= 0:
+        print("Error: set-size must be a non-negative, nonzero integer.")
+
     check_unconsumed(args, consumed)
 
     options: dict[str, int] = {
         "memory_size": str_to_size(memory_size),
         "block_size": str_to_size(block_size),
         "cache_size": str_to_size(cache_size),
+        "k": cast(int, k),
+        "reads": reads
     }
     run_handler(options)
 
