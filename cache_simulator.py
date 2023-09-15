@@ -4,8 +4,10 @@ This will orchestrate the simulator and its components.
 """
 
 from cli_parser import parse_arguments
+from cache import Cache
 
 import sys
+import random
 
 program_name = "CacheSim"
 version = "0.0.1"
@@ -37,6 +39,12 @@ def run_help(executing_file: str):
 
 def run_simulator(options: dict[str, int]):
     print(options)
+
+    cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], 1)
+
+    for i in range(10):
+        address = random.randint(0, options["memory_size"])
+        print(f"A: {address:x}, hit: {cache.read(address)}")
 
 
 if __name__ == "__main__":
