@@ -10,6 +10,9 @@ class Cache:
         if not is_power_of_two(cache_size):
             raise ValueError("Cache size must be a power of two!")
         
+        if not is_power_of_two(k):
+            raise ValueError("Set size must be a power of two!")
+        
         if memory_size < cache_size:
             raise ValueError("Memory size must be greater than cache size!")
         

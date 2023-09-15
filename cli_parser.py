@@ -106,19 +106,19 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     if not k and k_parsed is None:
         print("Error: You must specify the set size when using a set-associative cache.")
-        print(f"You can do so by running: python {file_name} set-associative -ways <set-size> reads")
+        print(f"You can do so by running: python {file_name} set-associative --ways <set-size> reads")
+        sys.exit(1)
+
+    if k is not None and k_parsed is not None:
+        print("Error: Set size can not be specified when using a direct or associative mapping!")
         sys.exit(1)
     
-    if not k and k_parsed is not None:
+    if k is None and k_parsed is not None:
         try:
             k = int(k_parsed)
         except ValueError:
             print(f"Error: Could not interpret value for k: {k_parsed}")
             sys.exit(1)
-    
-    if k is not None and k_parsed is not None:
-        print("Error: Set size can not be specified when using a direct or associative mapping!")
-        sys.exit(1)
     
     if k is not None and k <= 0:
         print("Error: set-size must be a non-negative, nonzero integer.")
