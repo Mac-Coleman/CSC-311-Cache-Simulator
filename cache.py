@@ -27,10 +27,10 @@ class Cache:
 
 
     def read(self, address: int) -> int:
-        page_number = (address // self.block_size)
-        upper, lower = self.map(page_number)
+        page_number = address // self.block_size
+        upper, lower = self.direct_map(page_number)
 
-        tag = page_number % (self.num_of_lines // self.k)
+        tag = page_number // (self.num_of_lines // self.k)
         hit = self.check_hit(lower, upper, tag)
 
         if not hit:
@@ -38,8 +38,8 @@ class Cache:
         
         return hit
 
-    def map(self, page_number: int) -> tuple[int, int]:
-        set_index = (page_number // self.block_size) % (self.num_of_lines // self.k) # Get set number
+    def direct_map(self, page_number: int) -> tuple[int, int]:
+        set_index = (page_number) % (self.num_of_lines // self.k) # Get set number
 
         lower_index = set_index * self.k
         upper_index = set_index * self.k + self.k

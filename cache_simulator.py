@@ -42,7 +42,7 @@ def run_simulator(options: dict[str, int]):
 
     cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], 1)
 
-    for i in range(10):
+    for i in range(1000):
         address = random.randint(0, options["memory_size"])
         print(f"A: {address:x}, hit: {cache.read(address)}")
 
