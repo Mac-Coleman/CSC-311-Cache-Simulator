@@ -1,12 +1,12 @@
 
 from address_generator import AddressGenerator
-from cache import Cache
+from cache import Cache, DirectCache
 from output_builder import OutputBuilder
 
 import time
 
 def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
-    cache = Cache(page_size, cache_size, max_size, set_size, replacement_algorithm)
+    cache = DirectCache(page_size, cache_size, max_size)
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
@@ -17,7 +17,7 @@ def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:i
     for i in range(reads):
         address = address_maker.generate_address()
 
-        hit = cache.read(address)
+        page, hit = cache.read(address)
         output_builder.add(i, hit)
 
         hit_counter += int(hit)
