@@ -49,7 +49,10 @@ def run_simulator(options: dict[str, int]):
         address = random.randint(0, options["memory_size"])
         #print(address)
         hit = cache.read(address)
-        print(f"A: {address:016x}, hit: {hit}")
+        if i % 1000 == 0:
+            print(f"\rA: {address:016x}, hit: {hit:b}, {i/options['reads'] * 100 :.2f}%", end="")
+    
+    print(f"\rA: {address:016x}, hit: {hit:b}, {100:.2f}%")
     
     print(time.perf_counter() - start)
 
