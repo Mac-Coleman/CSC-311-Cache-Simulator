@@ -3,7 +3,7 @@ import math
 
 class Cache:
 
-    def __init__(self, block_size, cache_size, memory_size, k):
+    def __init__(self, block_size, cache_size, memory_size, k, algorithm):
 
         if not is_power_of_two(block_size):
             raise ValueError("Block size must be a power of two!")
@@ -35,6 +35,15 @@ class Cache:
         print("set number length:", self.set_number_length)
         print("tag length:", self.tag_length)
 
+        algo_dict = {
+            "lru": self.replace_lru
+        }
+
+        try:
+            self.replacement_algorithm = algo_dict[algorithm]
+        except KeyError:
+            raise ValueError(f"Invalid replacement algorithm: {algorithm}")
+
         self.lines = [CacheLine() for x in range(self.num_of_lines)]
         # List comprehension in order to avoid shallow copy
 
@@ -52,7 +61,7 @@ class Cache:
         #print(f"{page_number:08x}, {tag:08x}")
 
         if not hit:
-            self.replace(lower, upper, tag)
+            self.replacement_algorithm(lower, upper, tag)
         
         return hit
 

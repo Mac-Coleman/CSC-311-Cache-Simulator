@@ -5,8 +5,8 @@ from output_builder import OutputBuilder
 
 import time
 
-def simulator(max_size:int, page_size:int, cache_size:int, map_algorithm, set_size:int, reads:int):
-    cache = Cache(page_size, cache_size, max_size, set_size)
+def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
+    cache = Cache(page_size, cache_size, max_size, set_size, replacement_algorithm)
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0

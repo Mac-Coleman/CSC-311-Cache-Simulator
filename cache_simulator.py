@@ -43,7 +43,7 @@ def run_help(executing_file: str):
 def run_simulator(options: dict[str, int]):
     print(options)
 
-    simulator(options["memory_size"], options["block_size"], options["cache_size"], 0, options["k"], options["reads"])
+    simulator(options["memory_size"], options["block_size"], options["cache_size"], options["k"], options["reads"], "lru")
 
 
 
