@@ -52,10 +52,10 @@ class Cache:
     def check_hit(self, start_index: int, end_index: int, tag: int) -> bool:
         
         # Traverse lines in set, check if they are hits.
-        for i in range(start_index, end_index):
-            if self.lines[i].valid and self.lines[i].tag == tag:
-                self.lines[i].access_count += 1
-                return True
+        i = self.lines.index(tag, start_index, end_index) if tag in self.lines[start_index:end_index] else False
+
+        if i is not None and self.lines[i].valid:
+            return True
 
         return False
 
@@ -64,9 +64,25 @@ class Cache:
         if start_index + 1 == end_index: # We have only one choice!
             self.lines[start_index].tag = tag
             self.lines[start_index].valid = True
-            print(f"\treplacing {start_index}")
+            #print(f"\treplacing {start_index}")
+        
+        self.replace_lru(start_index, end_index, tag)
 
         self.replace_count += 1
+    
+    def replace_lru(self, start_index: int, end_index: int, tag: int) -> None:
+        min_used = self.lines[start_index].access_count
+        min_index = start_index
+
+        for i in range(start_index, end_index):
+            if min_used > (ac := self.lines[i].access_count):
+                min_index = i
+                min_used = ac
+        
+        c = self.lines[min_index]
+        c.tag = tag
+        c.access_count += 1
+        c.valid = True
 
 
 @dataclass
@@ -75,6 +91,9 @@ class CacheLine:
     valid : bool = False
     tag : int = 0
     access_count : int = 0
+
+    def __eq__(self, other) -> bool:
+        return self.tag == other
 
 def is_power_of_two(num: int) -> bool:
     # For any power of two, its binary interpretation can have exactly one set bit.

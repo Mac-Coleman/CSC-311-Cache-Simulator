@@ -47,7 +47,8 @@ def run_simulator(options: dict[str, int]):
     start = time.perf_counter()
     for i in range(options["reads"]):
         address = random.randint(0, options["memory_size"])
-        print(f"A: {address:05x}, hit: {cache.read(address)}")
+        hit = cache.read(address)
+        #print(f"A: {address:05x}, hit: {hit}")
     
     print(time.perf_counter() - start)
 
