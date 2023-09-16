@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import math
 
 class Cache:
 
@@ -22,6 +23,18 @@ class Cache:
         self.num_of_lines = cache_size // block_size
         self.block_size = block_size
 
+        self.offset_length = math.ceil(math.log(block_size, 2))
+        self.page_number_length = math.ceil(math.log(memory_size, 2)) - self.offset_length
+        self.set_number_length = math.ceil(math.log(self.num_of_lines // k, 2))
+        self.tag_length = self.page_number_length - self.set_number_length
+
+        self.set_number_bitmask = 2**self.set_number_length - 1
+        print("offset:",self.offset_length)
+        print("page num length:", self.page_number_length)
+        print("lines:", self.num_of_lines)
+        print("set number length:", self.set_number_length)
+        print("tag length:", self.tag_length)
+
         self.lines = [CacheLine() for x in range(self.num_of_lines)]
         # List comprehension in order to avoid shallow copy
 
@@ -30,11 +43,13 @@ class Cache:
 
 
     def read(self, address: int) -> int:
-        page_number = address // self.block_size
+        page_number = address >> self.offset_length
         upper, lower = self.direct_map(page_number)
 
-        tag = page_number // (self.num_of_lines // self.k)
+        tag = page_number >> self.set_number_length
         hit = self.check_hit(lower, upper, tag)
+
+        print(f"{page_number:08x}, {tag:08x}")
 
         if not hit:
             self.replace(lower, upper, tag)
@@ -42,10 +57,10 @@ class Cache:
         return hit
 
     def direct_map(self, page_number: int) -> tuple[int, int]:
-        set_index = (page_number) % (self.num_of_lines // self.k) # Get set number
+        set_index = page_number & self.set_number_bitmask # Get set number
 
         lower_index = set_index * self.k
-        upper_index = set_index * self.k + self.k
+        upper_index = lower_index + self.k
         # Only a direct mapping for now!
         return upper_index, lower_index
     
@@ -54,7 +69,7 @@ class Cache:
         # Traverse lines in set, check if they are hits.
         i = self.lines.index(tag, start_index, end_index) if tag in self.lines[start_index:end_index] else False
 
-        if i is not None and self.lines[i].valid:
+        if i is not False and self.lines[i].valid:
             return True
 
         return False
