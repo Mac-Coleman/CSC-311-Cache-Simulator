@@ -8,6 +8,7 @@ from cache import Cache
 
 import sys
 import random
+import time
 
 program_name = "CacheSim"
 version = "0.0.1"
@@ -23,6 +24,7 @@ help_string = f"\n{program_name} {version}\n\n" \
     " -c, --cache-size <size>  size of the cache\n" \
     "                          default: 32KB\n" \
     " -h, --help               display this help message\n" \
+    " -k, --ways <set-size>    the size of each set in a set-associative cache\n" \
     " -m, --memory-size <size> physical memory size\n" \
     "                          default: 256MB\n" \
     " -v, --version            display version\n" \
@@ -42,9 +44,12 @@ def run_simulator(options: dict[str, int]):
 
     cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], options["k"])
 
+    start = time.perf_counter()
     for i in range(options["reads"]):
         address = random.randint(0, options["memory_size"])
         print(f"A: {address:05x}, hit: {cache.read(address)}")
+    
+    print(time.perf_counter() - start)
 
 
 if __name__ == "__main__":
