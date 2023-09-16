@@ -78,7 +78,8 @@ class Cache:
         # Traverse lines in set, check if they are hits.
         i = self.lines.index(tag, start_index, end_index) if tag in self.lines[start_index:end_index] else False
 
-        if i is not False and self.lines[i].valid:
+        if i is not False and (line := self.lines[i]).valid:
+            line.access_count += 1
             return True
 
         return False

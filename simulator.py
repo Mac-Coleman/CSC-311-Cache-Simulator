@@ -23,8 +23,8 @@ def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:i
         hit_counter += int(hit)
         total_counter += 1
 
-        if i % 1000 == 0:
-            print(f"\rA: {address:016x}, hit: {hit:b}, {i/reads * 100 :.2f}%", end="")
+        #if i % 1000 == 0:
+        #    print(f"\rA: {address:016x}, hit: {hit:b}, {i/reads * 100 :.2f}%", end="")
     
     print(f"\rA: {address:016x}, hit: {hit:b}, {100:.2f}%")
     
