@@ -49,7 +49,7 @@ class Cache:
         tag = page_number >> self.set_number_length
         hit = self.check_hit(lower, upper, tag)
 
-        print(f"{page_number:08x}, {tag:08x}")
+        #print(f"{page_number:08x}, {tag:08x}")
 
         if not hit:
             self.replace(lower, upper, tag)
@@ -98,6 +98,9 @@ class Cache:
         c.tag = tag
         c.access_count += 1
         c.valid = True
+    
+    def get_replacement_count(self) -> int:
+        return self.replace_count
 
 
 @dataclass

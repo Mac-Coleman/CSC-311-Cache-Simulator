@@ -161,3 +161,6 @@ cython_debug/
 
 # Visual Studio Code stuff
 .vscode/
+
+# Program output
+hit_and_miss.txt

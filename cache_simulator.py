@@ -5,6 +5,7 @@ This will orchestrate the simulator and its components.
 
 from cli_parser import parse_arguments
 from cache import Cache
+from simulator import simulator
 
 import sys
 import random
@@ -42,19 +43,8 @@ def run_help(executing_file: str):
 def run_simulator(options: dict[str, int]):
     print(options)
 
-    cache = Cache(options["block_size"], options["cache_size"], options["memory_size"], options["k"])
+    simulator(options["memory_size"], options["block_size"], options["cache_size"], 0, options["k"], options["reads"])
 
-    start = time.perf_counter()
-    for i in range(options["reads"]):
-        address = random.randint(0, options["memory_size"])
-        #print(address)
-        hit = cache.read(address)
-        if i % 1000 == 0:
-            print(f"\rA: {address:016x}, hit: {hit:b}, {i/options['reads'] * 100 :.2f}%", end="")
-    
-    print(f"\rA: {address:016x}, hit: {hit:b}, {100:.2f}%")
-    
-    print(time.perf_counter() - start)
 
 
 if __name__ == "__main__":

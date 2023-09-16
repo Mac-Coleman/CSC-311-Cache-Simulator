@@ -1,20 +1,37 @@
 
-from address_generator import AddressGenerator 
+from address_generator import AddressGenerator
+from cache import Cache
+from output_builder import OutputBuilder
+
+import time
+
 def simulator(max_size:int, page_size:int, cache_size:int, map_algorithm, set_size:int, reads:int):
-    #cache=cache()
-    #output_builder=OutputBuilder()
-    hit_counter=0
-    total_counter=0
-    address_maker=AddressGenerator(max_size)
-    for i in reads:
-        address=address_maker.generate_address(max_size)
-        hit=None#cache.read(address)
-        #outputbuilder.add(hit,i)
-        if(hit):
-            hit_counter+=1
-        total_counter+=1
-    hit_ratio=hit_counter/total_counter
-    #replacements=cache.getReplacementCount()
-    #output_builder.close()
-    #output_builder.print_data(hit_ratio,locality,replacements)
+    cache = Cache(page_size, cache_size, max_size, set_size)
+    output_builder = OutputBuilder()
+    hit_counter = 0
+    total_counter = 0
+    address_maker = AddressGenerator(max_size)
+
+    start = time.perf_counter()
+
+    for i in range(reads):
+        address = address_maker.generate_address()
+
+        hit = cache.read(address)
+        output_builder.add(i, hit)
+
+        hit_counter += int(hit)
+        total_counter += 1
+
+        if i % 1000 == 0:
+            print(f"\rA: {address:016x}, hit: {hit:b}, {i/reads * 100 :.2f}%", end="")
+    
+    print(f"\rA: {address:016x}, hit: {hit:b}, {100:.2f}%")
+    
+    print(time.perf_counter() - start)
+
+    hit_ratio = hit_counter / total_counter
+    replacements = cache.get_replacement_count()
+    output_builder.close_output()
+    output_builder.print_data(hit_ratio, replacements, 0)
     #output builder make output from replacements and hit record 

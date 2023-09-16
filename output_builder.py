@@ -1,12 +1,8 @@
 
 class OutputBuilder:
 
-    def __init__(self, replacement_count, hit_count, miss_count, read_locality):
-        self.replacement_count = replacement_count
-        self.hit_count = hit_count
-        self.miss_count = miss_count
-        self. read_locality = read_locality
-        self.output_file
+    def __init__(self):
+        self.open_output()
 
     ### Prints Output data to the consol
     def print_data(self, hit_ratio, replacement_count, locality):
@@ -25,8 +21,6 @@ class OutputBuilder:
     ### Writes a new line to the file
     def add(self, index, result):
         if result:
-            self.output_file.write("{0:2d} {1:3d}".format(index, "hit"))
-        elif result:
-            self.output_file.write("{0:2d} {1:3d}".format(index, "miss"))
+            self.output_file.write("{0:x} {1}\n".format(index, "hit"))
         else:
-            print("Something is Wrong!")
+            self.output_file.write("{0:x} {1}\n".format(index, "miss"))
