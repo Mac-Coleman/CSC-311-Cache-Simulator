@@ -3,11 +3,25 @@ from address_generator import AddressGenerator
 from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache
 from output_builder import OutputBuilder
 import ansi_terminal as cursor
+import sys
 
 import time
 import math
 
 def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
+    if not is_power_of_two(max_size):
+        print("Memory size must be a power of two!")
+        sys.exit(1)    
+    if not is_power_of_two(page_size):
+        print("Page size must be a power of two!")
+        sys.exit(1)    
+    if not is_power_of_two(cache_size):
+        print("Cache size must be a power of two!")
+        sys.exit(1)
+    if not is_power_of_two(set_size):
+        print("Set size must be a power of two!")
+        sys.exit(1)
+
     cache = SetAssociativeCache(page_size, cache_size, max_size, "lru", set_size)
     output_builder = OutputBuilder()
     hit_counter = 0
@@ -67,3 +81,6 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     output_builder.close_output()
     output_builder.print_data(hit_ratio, replacements, 0)
     #output builder make output from replacements and hit record 
+def is_power_of_two(num: int) -> bool:
+    # For any power of two, its binary interpretation can have exactly one set bit.
+    return num.bit_count() == 1
