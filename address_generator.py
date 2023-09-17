@@ -10,6 +10,7 @@ class AddressGenerator:
         self.patternDict={
             0:self.random,
             1:self.read_full_page,
+            2:self.random_sequential,
         }
     def generate_address(self):
         return self.patternDict.get(self.pattern)()
@@ -25,8 +26,14 @@ class AddressGenerator:
         else:
             self.pointer+=1
         return self.pointer
-    
+    def random_sequential(self):
+        if(self.pointer==self.limit):
+            self.pointer=random.randint(0,self.max_size-1)
+            self.limit=random.randint(self.pointer,self.max_size-1)
+        else:
+            self.pointer+=1
+        return self.pointer
 if __name__=="__main__":
-    ag=AddressGenerator(256,16,1)
+    ag=AddressGenerator(256,16,2)
     for i in range(128):
         print(ag.generate_address())
