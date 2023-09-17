@@ -4,7 +4,11 @@ import math
 import random
 
 class Cache:
-
+    '''
+    Parent class for DirectCache, AssociativeCache, and SetAssociativeCache
+    Initialized with block size, cache size, and main memory size, must be in powers of two
+    Each Cache Class has seperate logic for calculating cache hits and cache misses.
+    '''
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
 
         if not is_power_of_two(block_size):
@@ -35,10 +39,14 @@ class DirectCache(Cache):
         self.lines = [CacheLine() for _ in range(self.num_of_lines)]
     
     def read(self, address: int) -> tuple[int, bool]:
-        page = address % self.block_size
+        # removes word offset
+        page = address // self.block_size
+        # makes the line number (right hand side of bits)
         line = page % self.num_of_lines
+        # makes the tag (left hand side of bits)
         tag = page // self.num_of_lines
 
+        # chosen line
         cl = self.lines[line]
         hit = cl == tag
 
@@ -47,19 +55,24 @@ class DirectCache(Cache):
             cl.valid = True
             self.replace_count += 1
         cl.access_count += 1
+
         return page, hit
 
 
 class AssociativeCache(Cache):
     def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str):
         super(AssociativeCache, self).__init__(block_size, cache_size, memory_size)
+        # makes a set of cachelines
         self.lines = CacheSet(self.num_of_lines, "lru")
     
     def read(self, address: int) -> tuple[int, bool]:
+        # removes word offset
         page_number = address // self.block_size
+        # call read method in cacheset
         hit = self.lines.read(page_number)
         if not hit:
             self.replace_count += 1
+
         return page_number, hit
 
 class SetAssociativeCache(Cache):
@@ -73,8 +86,11 @@ class SetAssociativeCache(Cache):
         self.sets = [CacheSet(set_size, replacement_algorithm) for x in range(self.num_of_sets)]
     
     def read(self, address: int) -> tuple[int, bool]:
+        # removes word offset
         page = address // self.block_size
+        # takes the set (right hand side of page)
         set_index = page % self.num_of_sets
+        # takes the tag (left hand side of page)
         tag = page // self.num_of_sets
 
         s = self.sets[set_index]
@@ -106,6 +122,7 @@ class CacheSet:
         self.fifo_pointer = 0
         algo_dict = {
             "lru": self.replace_lru,
+            "lfu" : self.replace_lfu,
             "fifo": self.replace_fifo,
             "random": self.replace_fifo
         }
@@ -148,7 +165,6 @@ class CacheSet:
 
         return l
         
-
     def replace_random(self, tag: int) -> CacheLine:
         l = random.choice(self.lines)
         l.tag = tag
