@@ -11,6 +11,7 @@ class AddressGenerator:
             0:self.random,
             1:self.read_full_page,
             2:self.random_sequential,
+            3:self.full_ram_sequential
         }
     def generate_address(self):
         return self.patternDict.get(self.pattern)()
@@ -33,7 +34,17 @@ class AddressGenerator:
         else:
             self.pointer+=1
         return self.pointer
+    def full_ram_sequential(self):
+        if(self.pointer==self.limit):
+            self.pointer=0
+            self.limit=self.max_size-1
+        else:
+            self.pointer+=1
+        return self.pointer
+
+
+
 if __name__=="__main__":
-    ag=AddressGenerator(256,16,2)
+    ag=AddressGenerator(256,16,3)
     for i in range(128):
         print(ag.generate_address())
