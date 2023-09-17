@@ -3,6 +3,8 @@ from address_generator import AddressGenerator
 from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache
 from output_builder import OutputBuilder
 
+import ansi_terminal as cursor
+
 import time
 
 def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
@@ -14,6 +16,8 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
 
     start = time.perf_counter()
 
+    print("\n")
+
     for i in range(reads):
         address = address_maker.generate_address()
 
@@ -24,11 +28,33 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
         total_counter += 1
 
         if i % 1000 == 0:
-            print(f"\rA: {address:016x}, hit: {hit:b}, {i/reads * 100 :.2f}%", end="")
+            cursor.move_up()
+            cursor.move_up()
+            cursor.erase()
+            print(f"\rA: {address:016x}, hit: ", end="")
+            cursor.green() if hit else cursor.red()
+            print(f"{hit:b}", end="")
+            cursor.reset()
+            print(f", hit ratio: {hit_counter/total_counter * 100 :0.2f}%")
+            
+            cursor.yellow()
+            cursor.erase()
+            print(f"[{'='*int(i/reads * 20)}{' '*int((1 - (i/reads)) * 20)}] Progress: {i/reads * 100:0.2f}%", end="\n")
+            cursor.reset()
     
-    print(f"\rA: {address:016x}, hit: {hit:b}, {100:.2f}%")
+    cursor.move_up()
+    cursor.move_up()
+    cursor.erase()
+    print(f"\rA: {address:016x}, hit: ", end="")
+    cursor.green() if hit else cursor.red()
+    print(f"{hit:b}", end="")
+    cursor.reset()
+    print(f", hit ratio: {hit_counter/total_counter * 100 :0.2f}%")
     
-    print(time.perf_counter() - start)
+    cursor.green()
+    cursor.erase()
+    print(f"[{'='*int(i/reads * 20)}{' '*int((1 - (i/reads)) * 20)}] Progress: {i/reads * 100:0.2f}%", end="\n")
+    cursor.reset()
 
     hit_ratio = hit_counter / total_counter
     replacements = cache.get_replacement_count()

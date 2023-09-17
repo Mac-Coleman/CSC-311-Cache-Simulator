@@ -41,8 +41,6 @@ def run_help(executing_file: str):
     print(help_string.format(executing_file_name=executing_file))
 
 def run_simulator(options: dict[str, int]):
-    print(options)
-
     simulate(options["memory_size"], options["block_size"], options["cache_size"], options["k"], options["reads"], "lru")
 
 
