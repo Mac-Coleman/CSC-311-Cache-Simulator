@@ -18,23 +18,23 @@ class AddressGenerator:
     def get_random_page(self):
         return random.randint(0,self.max_size//self.page_size-1)*self.page_size
     #different algorithms for generating input patterns 
-    def random(self):
+    def random(self):# get a random line every time
         return random.randint(0,self.max_size)
-    def read_full_page(self):
+    def read_full_page(self):#get a random page, and read the entire page before finding a new one
         if(self.pointer==self.limit):
             self.pointer=self.get_random_page()
             self.limit=self.pointer+self.page_size-1
         else:
             self.pointer+=1
         return self.pointer
-    def random_sequential(self):
+    def random_sequential(self):#starts at a random line, runs seuentially for a random number of lines
         if(self.pointer==self.limit):
             self.pointer=random.randint(0,self.max_size-1)
             self.limit=random.randint(self.pointer,self.max_size-1)
         else:
             self.pointer+=1
         return self.pointer
-    def full_ram_sequential(self):
+    def full_ram_sequential(self):#reads entire ram sequentially
         if(self.pointer==self.limit):
             self.pointer=0
             self.limit=self.max_size-1
