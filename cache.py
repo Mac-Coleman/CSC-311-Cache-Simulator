@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from operator import attrgetter
 import math
 
 class Cache:
@@ -18,6 +19,8 @@ class Cache:
         self.cache_size = cache_size
         self.memory_size = memory_size
         self.replace_count = 0
+
+        self.num_of_lines = self.cache_size // self.block_size
     
     def read(self, address: int) -> tuple[int, bool]:
         pass
@@ -28,7 +31,6 @@ class Cache:
 class DirectCache(Cache):
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
         super(DirectCache, self).__init__(block_size, cache_size, memory_size)
-        self.num_of_lines = self.cache_size // self.block_size
         self.lines = [CacheLine() for _ in range(self.num_of_lines)]
     
     def read(self, address: int) -> tuple[int, bool]:
@@ -48,7 +50,16 @@ class DirectCache(Cache):
 
 
 class AssociativeCache(Cache):
-    pass
+    def __init__(self, block_size: int, cache_size: int, memory_size: int):
+        super(AssociativeCache, self).__init__(block_size, cache_size, memory_size)
+        self.lines = CacheSet(self.num_of_lines, "lru")
+    
+    def read(self, address: int) -> tuple[int, bool]:
+        page_number = address // self.block_size
+        hit = self.lines.read(page_number)
+        if not hit:
+            self.replace_count += 1
+        return page_number, hit
 
 class SetAssociativeCache(Cache):
     pass
@@ -66,3 +77,39 @@ class CacheLine:
 def is_power_of_two(num: int) -> bool:
     # For any power of two, its binary interpretation can have exactly one set bit.
     return num.bit_count() == 1
+
+class CacheSet:
+    def __init__(self, lines, replacement_algorithm):
+        self.lines = [CacheLine() for x in range(lines)]
+        algo_dict = {
+            "lru": self.replace_lru,
+            "fifo": self.replace_fifo,
+            "random": self.replace_fifo
+        }
+        self.replacement_algorithm = algo_dict[replacement_algorithm]
+    
+    def read(self, tag: int) -> bool:
+        """
+        Returns Bool, whether line was replaced or not
+        """
+        cl = self.lines[self.lines.index(tag)] if tag in self.lines else None
+        flag = True
+
+        if cl == None:
+            flag = False
+            cl = self.replacement_algorithm(tag)
+        
+        cl.access_count += 1
+        return flag
+    
+    def replace_lru(self, tag: int) -> CacheLine:
+        l = min(self.lines, key=attrgetter("access_count"))
+        l.tag = tag
+        l.valid = True
+        return l
+
+    def replace_fifo(self, tag: int) -> CacheLine:
+        pass
+
+    def replace_random(self, tag: int) -> CacheLine:
+        pass
