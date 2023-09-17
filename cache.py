@@ -50,7 +50,7 @@ class DirectCache(Cache):
 
 
 class AssociativeCache(Cache):
-    def __init__(self, block_size: int, cache_size: int, memory_size: int):
+    def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str):
         super(AssociativeCache, self).__init__(block_size, cache_size, memory_size)
         self.lines = CacheSet(self.num_of_lines, "lru")
     
@@ -62,7 +62,27 @@ class AssociativeCache(Cache):
         return page_number, hit
 
 class SetAssociativeCache(Cache):
-    pass
+    def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str, set_size: int):
+
+        if not is_power_of_two(set_size):
+            raise ValueError("Set size 'k' must be a power of two!")
+        
+        super(SetAssociativeCache, self).__init__(block_size, cache_size, memory_size)
+        self.num_of_sets = self.num_of_lines // set_size
+        self.sets = [CacheSet(set_size, replacement_algorithm) for x in range(self.num_of_sets)]
+    
+    def read(self, address: int) -> tuple[int, bool]:
+        page = address // self.block_size
+        set_index = page % self.num_of_sets
+        tag = page // self.num_of_sets
+
+        s = self.sets[set_index]
+        hit = s.read(tag)
+
+        if not hit:
+            self.replace_count += 1
+        return page, hit
+
 
 @dataclass
 class CacheLine:

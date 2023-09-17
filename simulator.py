@@ -1,12 +1,12 @@
 
 from address_generator import AddressGenerator
-from cache import Cache, DirectCache, AssociativeCache
+from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache
 from output_builder import OutputBuilder
 
 import time
 
 def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
-    cache = AssociativeCache(page_size, cache_size, max_size)
+    cache = SetAssociativeCache(page_size, cache_size, max_size, "lru", set_size)
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
