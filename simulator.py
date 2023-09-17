@@ -5,7 +5,7 @@ from output_builder import OutputBuilder
 
 import time
 
-def simulator(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
+def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
     cache = SetAssociativeCache(page_size, cache_size, max_size, "lru", set_size)
     output_builder = OutputBuilder()
     hit_counter = 0
