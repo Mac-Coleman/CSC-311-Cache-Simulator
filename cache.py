@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from operator import attrgetter
 import math
+import random
 
 class Cache:
 
@@ -101,6 +102,7 @@ def is_power_of_two(num: int) -> bool:
 class CacheSet:
     def __init__(self, lines, replacement_algorithm):
         self.lines = [CacheLine() for x in range(lines)]
+        self.fifo_pointer = 0
         algo_dict = {
             "lru": self.replace_lru,
             "fifo": self.replace_fifo,
@@ -129,7 +131,18 @@ class CacheSet:
         return l
 
     def replace_fifo(self, tag: int) -> CacheLine:
-        pass
+        l = self.lines[self.fifo_pointer]
+        l.tag = tag
+        l.valid = True
+        self.fifo_pointer += 1
+        if self.fifo_pointer == len(self.lines):
+            self.fifo_pointer = 0
+
+        return l
+        
 
     def replace_random(self, tag: int) -> CacheLine:
-        pass
+        l = random.choice(self.lines)
+        l.tag = tag
+        l.valid = True
+        return l
