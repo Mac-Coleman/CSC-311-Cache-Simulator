@@ -8,7 +8,7 @@ class AddressGenerator:
         self.limit=0
         self.page_size=page_size
         self.patternDict={
-            0:self.random_pattern,
+            0:self.random,
             1:self.read_full_page,
         }
     def generate_address(self):
@@ -16,7 +16,7 @@ class AddressGenerator:
     def get_random_page(self):
         return random.randint(0,self.max_size//self.page_size-1)*self.page_size
     #different algorithms for generating input patterns 
-    def random_pattern(self):
+    def random(self):
         return random.randint(0,self.max_size)
     def read_full_page(self):
         if(self.pointer==self.limit):
