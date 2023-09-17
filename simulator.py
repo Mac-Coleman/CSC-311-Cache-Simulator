@@ -35,7 +35,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
             cursor.erase()
             print("\rA: {a:0{width}x}\t".format(a=address, width=address_length), end="")
             cursor.green() if hit else cursor.red()
-            print(f"{' hit' if hit else 'miss'}", end="")
+            print(f"{'hit ' if hit else 'miss'}", end="")
             cursor.reset()
             print(f"\thit ratio: {hit_counter/total_counter * 100 :0.2f}%")
 
@@ -51,7 +51,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     cursor.erase()
     print("\rA: {a:0{width}x}\t".format(a=address, width=address_length), end="")
     cursor.green() if hit else cursor.red()
-    print(f"{' hit' if hit else 'miss'}", end="")
+    print(f"{'hit ' if hit else 'miss'}", end="")
     cursor.reset()
     print(f"\thit ratio: {hit_counter/total_counter * 100 :0.2f}%")
     
@@ -60,7 +60,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     cursor.green()
     print(f"{'='*int(i/reads * 20)}{' '*int((1 - (i/reads)) * 20)}", end="")
     cursor.reset()
-    print(f"] Progress: {100:0.2f}%", end="\n")
+    print(f"] Progress: Finished!", end="\n")
 
     hit_ratio = hit_counter / total_counter
     replacements = cache.get_replacement_count()
