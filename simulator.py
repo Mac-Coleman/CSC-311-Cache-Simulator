@@ -26,7 +26,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
-    address_maker = AddressGenerator(max_size, page_size, 0)
+    address_maker = AddressGenerator(max_size, page_size, 1)
 
     address_length = math.ceil(math.log(max_size, 16))
 
