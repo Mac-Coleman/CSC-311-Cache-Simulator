@@ -6,10 +6,12 @@ This will orchestrate the simulator and its components.
 from cli_parser import parse_arguments
 from cache import Cache
 from simulator import simulate
+import ansi_terminal as cursor
 
 import sys
 import random
 import time
+from typing import cast
 
 program_name = "CacheSim"
 version = "0.0.1"
@@ -41,7 +43,8 @@ def run_help(executing_file: str):
     print(help_string.format(executing_file_name=executing_file))
 
 def run_simulator(options: dict[str, int]):
-    simulate(options["memory_size"], options["block_size"], options["cache_size"], options["k"], options["reads"], "lru")
+    cursor.setup(cast(bool, options["no_color"]))
+    simulate(options["memory_size"], options["block_size"], options["cache_size"], 1, options["reads"], "lru")
 
 
 

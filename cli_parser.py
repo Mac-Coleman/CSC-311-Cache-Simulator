@@ -44,6 +44,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
     cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
     k_parsed = get_option_value(args, consumed, "--ways", "-k")
+    no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
 
     # Unconsumed arguments are positionals.
     positionals: list[str] = []
@@ -80,58 +81,48 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     lines = (str_to_size(cache_size) // str_to_size(block_size))
 
-    k_dict: dict[str, int | None] = {
-        "direct": 1,
-        "d": 1,
-        "1": 1,
-        "associative": lines,
-        "a": lines,
-        "2": lines,
-        "set-associative": None,
-        "set_associative": None,
-        "s": None,
-        "3": None
+    type_dict: dict[str, str] = {
+        "direct": "direct",
+        "d": "direct",
+        "1": "direct",
+        "associative": "associative",
+        "a": "associative",
+        "2": "associative",
+        "set-associative": "set-associative",
+        "set_associative": "set-associative",
+        "s": "set-associative",
+        "3": "set-associative"
     }
 
-    k = None
     try:
-        k = k_dict[cache_type]
+        cache_type = type_dict[cache_type]
     except KeyError:
-        print(f"Error: Unrecognized cache type: {cache_type}\n")
-        print("Cache types:")
-        print("\tdirect")
-        print("\tassociative")
-        print("\tset-associative")
-        sys.exit(1)
-
-    if not k and k_parsed is None:
-        print("Error: You must specify the set size when using a set-associative cache.")
-        print(f"You can do so by running: python {file_name} set-associative --ways <set-size> reads")
-        sys.exit(1)
-
-    if k is not None and k_parsed is not None:
-        print("Error: Set size can not be specified when using a direct or associative mapping!")
+        print(f"Error: Unrecognized cache type: {cache_type}")
         sys.exit(1)
     
-    if k is None and k_parsed is not None:
-        try:
-            k = int(k_parsed)
-        except ValueError:
-            print(f"Error: Could not interpret value for k: {k_parsed}")
-            sys.exit(1)
+    if cache_type != "set-associative" and k_parsed is not None:
+        print("Error: set size can only be specified for set-associative caches!")
+        print("You must remove the --ways or -k options, or switch to a different cache type.")
+        sys.exit(1)
     
-    if k is not None and k <= 0:
-        print("Error: set-size must be a non-negative, nonzero integer.")
+    if cache_type == "set-associative" and k_parsed is None:
+        print("Error: set size is required when using a set-associative cache!")
+        print("You must add the --ways or -k flag, or switch to a different type of cache.")
+        sys.exit(1)
 
     check_unconsumed(args, consumed)
 
-    options: dict[str, int] = {
+    options: dict[str, int | bool] = {
         "memory_size": str_to_size(memory_size),
         "block_size": str_to_size(block_size),
         "cache_size": str_to_size(cache_size),
-        "k": cast(int, k),
-        "reads": reads
+        "reads": reads,
+        "no_color": no_colorize
     }
+
+    if k_parsed is not None:
+        options["k"] = int(k_parsed)
+
     run_handler(options)
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
