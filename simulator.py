@@ -12,7 +12,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
-    address_maker = AddressGenerator(max_size)
+    address_maker = AddressGenerator(max_size, page_size, 0)
 
     address_length = math.ceil(math.log(max_size, 16))
 
@@ -29,7 +29,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
         hit_counter += int(hit)
         total_counter += 1
 
-        if i % 1000 == 0:
+        if i % 32768 == 0:
             cursor.move_up()
             cursor.move_up()
             cursor.erase()
