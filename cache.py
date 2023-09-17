@@ -84,6 +84,9 @@ class SetAssociativeCache(Cache):
             self.replace_count += 1
         return page, hit
 
+def is_power_of_two(num: int) -> bool:
+    # For any power of two, its binary interpretation can have exactly one set bit.
+    return num.bit_count() == 1
 
 @dataclass
 class CacheLine:
@@ -91,13 +94,11 @@ class CacheLine:
     valid : bool = False
     tag : int = 0
     access_count : int = 0
+    access_time : int = 0
 
     def __eq__(self, other) -> bool:
         return self.tag == other and self.valid
 
-def is_power_of_two(num: int) -> bool:
-    # For any power of two, its binary interpretation can have exactly one set bit.
-    return num.bit_count() == 1
 
 class CacheSet:
     def __init__(self, lines, replacement_algorithm):
@@ -128,6 +129,13 @@ class CacheSet:
         l = min(self.lines, key=attrgetter("access_count"))
         l.tag = tag
         l.valid = True
+        return l
+
+    def replace_lfu(self, tag: int) -> CacheLine:
+        l = min(self.lines, key=attrgetter("access_count"))
+        l.tag = tag
+        l.valid = True
+        l.access_count = 0  # been accessed one time
         return l
 
     def replace_fifo(self, tag: int) -> CacheLine:
