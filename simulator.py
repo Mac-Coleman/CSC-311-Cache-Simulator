@@ -1,27 +1,55 @@
 
 from address_generator import AddressGenerator
-from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache
+from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache, is_power_of_two
 from output_builder import OutputBuilder
 import ansi_terminal as cursor
+from cli_parser import OptionDict
 
 import time
 import math
+import sys
 
-def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:int, replacement_algorithm: str):
-    cache = SetAssociativeCache(page_size, cache_size, max_size, "lru", set_size)
+def simulate(options: OptionDict):
+    cache: Cache | None = None
+
+    try:
+        match options["cache_type"]:
+            case "direct":
+                cache = DirectCache(options["block_size"], options["cache_size"], options["memory_size"])
+            case "associative":
+                cache = AssociativeCache(options["block_size"], options["cache_size"], options["memory_size"], options["replacement"])
+            case "set-associative":
+                cache = SetAssociativeCache(options["block_size"], options["cache_size"], options["memory_size"], options["replacement"], options["k"])
+            case _:
+                raise KeyError(f"No such cache type: {options['cache_type']}")
+    except ValueError as e:
+        cursor.red()
+        print(f"Error: ", end="")
+        cursor.reset()
+        print(e)
+        sys.exit(1)
+    except KeyError as e:
+        cursor.red()
+        print(f"Error: ", end="")
+        cursor.reset()
+        print(e)
+        sys.exit(1)
+
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
-    address_maker = AddressGenerator(max_size, page_size, 0)
-    address_length = math.ceil(math.log(max_size, 16))
-    page_length = math.ceil(math.log(max_size // page_size, 16))
+    address_maker = AddressGenerator(options["memory_size"], options["block_size"], 0)
+    address_length = math.ceil(math.log(options["memory_size"], 16))
+    page_length = math.ceil(math.log(options["memory_size"] // options["block_size"], 16))
 
     locality: dict[int, int] = {}
+    reads = options["reads"]
+
     start = time.perf_counter()
 
     print("\n")
 
-    for i in range(reads):
+    for i in range(options["reads"]):
         address = address_maker.generate_address()
 
         page, hit = cache.read(address)
@@ -48,6 +76,8 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
             cursor.reset()
             print(f"] Progress: {i/reads * 100:0.2f}%", end="\n")
     
+    end = time.perf_counter()
+    
     cursor.move_up()
     cursor.move_up()
     cursor.erase()
@@ -67,10 +97,10 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     hit_ratio = hit_counter / total_counter
     replacements = cache.get_replacement_count()
 
-    print("\nRESULTS")
+    print("\n  RESULTS")
     print("\t   Hit Ratio:    ", end="")
     cursor.blue()
-    print(f"{hit_ratio * 100:06f}%")
+    print(f"{hit_ratio * 100:06f} %")
     cursor.reset()
     print("\t        Hits:    ", end="")
     cursor.blue()
@@ -87,6 +117,14 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     print("\tReplacements:    ", end="")
     cursor.blue()
     print(replacements)
+    cursor.reset()
+    print("\t        Time:   ", end="")
+    cursor.blue()
+    print(f"{end-start : .02f} seconds")
+    cursor.reset()
+    print("\t        Rate:   ", end="")
+    cursor.blue()
+    print(f"{total_counter / (end-start) : .02f} accesses per second")
     cursor.reset()
 
     output_builder.close_output()

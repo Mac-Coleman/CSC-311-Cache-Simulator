@@ -134,10 +134,10 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         if replacement_parsed.lower() in replacement_types:
             replacement = replacement_parsed.lower()
         else:
-            print("Error: Replacement algorithm unrecognized: '{replacement_parsed}'\n")
+            print(f"Error: Replacement algorithm unrecognized: '{replacement_parsed}'\n")
             print("REPLACEMENT ALGORITHMS:")
-            print("\tlru\tLeast recently used")
-            print("\tlfu\tLeast frequently used")
+            print("\tlru\tleast recently used")
+            print("\tlfu\tleast frequently used")
             print("\tfifo\tfirst in first out")
             print("\trandom\trandom")
             sys.exit(1)

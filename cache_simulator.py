@@ -3,7 +3,7 @@ The top-level organization for the main program logic.
 This will orchestrate the simulator and its components.
 """
 
-from cli_parser import parse_arguments
+from cli_parser import parse_arguments, OptionDict
 from cache import Cache
 from simulator import simulate
 import ansi_terminal as cursor
@@ -45,9 +45,15 @@ def run_version(executing_file: str):
 def run_help(executing_file: str):
     print(help_string.format(executing_file_name=executing_file))
 
-def run_simulator(options: dict[str, int]):
-    cursor.setup(cast(bool, options["no_color"]))
-    simulate(options["memory_size"], options["block_size"], options["cache_size"], 1, options["reads"], "lru")
+def run_simulator(options: OptionDict):
+    try:
+        cursor.setup(cast(bool, options["no_color"]))
+        simulate(options)
+    except KeyboardInterrupt:
+        cursor.erase()
+        cursor.red()
+        print("Simulation canceled!")
+        cursor.reset()
 
 
 

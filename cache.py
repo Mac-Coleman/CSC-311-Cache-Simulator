@@ -63,7 +63,7 @@ class AssociativeCache(Cache):
     def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str):
         super(AssociativeCache, self).__init__(block_size, cache_size, memory_size)
         # makes a set of cachelines
-        self.lines = CacheSet(self.num_of_lines, "lru")
+        self.lines = CacheSet(self.num_of_lines, replacement_algorithm)
     
     def read(self, address: int) -> tuple[int, bool]:
         # removes word offset
@@ -78,10 +78,15 @@ class AssociativeCache(Cache):
 class SetAssociativeCache(Cache):
     def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str, set_size: int):
 
+        super(SetAssociativeCache, self).__init__(block_size, cache_size, memory_size)
+
         if not is_power_of_two(set_size):
             raise ValueError("Set size 'k' must be a power of two!")
         
-        super(SetAssociativeCache, self).__init__(block_size, cache_size, memory_size)
+        if set_size > self.num_of_lines:
+            raise ValueError(f"Set size must be less than or equal to the number of lines in the cache! Lines: {self.num_of_lines}")
+        
+
         self.num_of_sets = self.num_of_lines // set_size
         self.sets = [CacheSet(set_size, replacement_algorithm) for x in range(self.num_of_sets)]
     
