@@ -52,7 +52,7 @@ def simulate(options: OptionDict):
     for i in range(options["reads"]):
         address = address_maker.generate_address()
 
-        page, hit = cache.read(address)
+        page, hit = cache.read(address, i)
         #output_builder.add(i, hit)
         locality[page] = locality.get(page, 0) + 1
 

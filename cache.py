@@ -27,7 +27,7 @@ class Cache:
 
         self.num_of_lines = self.cache_size // self.block_size
     
-    def read(self, address: int) -> tuple[int, bool]:
+    def read(self, address: int, time: int) -> tuple[int, bool]:
         pass
     
     def get_replacement_count(self) -> int:
@@ -65,11 +65,11 @@ class AssociativeCache(Cache):
         # makes a set of cachelines
         self.lines = CacheSet(self.num_of_lines, replacement_algorithm)
     
-    def read(self, address: int) -> tuple[int, bool]:
+    def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
         page_number = address // self.block_size
         # call read method in cacheset
-        hit = self.lines.read(page_number)
+        hit = self.lines.read(page_number, time)
         if not hit:
             self.replace_count += 1
 
@@ -90,7 +90,7 @@ class SetAssociativeCache(Cache):
         self.num_of_sets = self.num_of_lines // set_size
         self.sets = [CacheSet(set_size, replacement_algorithm) for x in range(self.num_of_sets)]
     
-    def read(self, address: int) -> tuple[int, bool]:
+    def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
         page = address // self.block_size
         # takes the set (right hand side of page)
@@ -99,7 +99,7 @@ class SetAssociativeCache(Cache):
         tag = page // self.num_of_sets
 
         s = self.sets[set_index]
-        hit = s.read(tag)
+        hit = s.read(tag, time)
 
         if not hit:
             self.replace_count += 1
@@ -136,7 +136,7 @@ class CacheSet:
         }
         self.replacement_algorithm = algo_dict[replacement_algorithm]
     
-    def read(self, tag: int) -> bool:
+    def read(self, tag: int, time: int) -> bool:
         """
         Returns Bool, whether line was replaced or not
         """
@@ -149,30 +149,30 @@ class CacheSet:
                 cl = self.replacement_algorithm(tag)
             else:
                 cl = self.lines[self.next_available]
+                cl.valid = True
                 next_available += 1
                 self.is_full = next_available == self.lines
             
+        # updates chosen line information
         cl.access_count += 1
+        cl.access_time = time
         return flag
    
 
     def replace_lru(self, tag: int) -> CacheLine:
-        l = min(self.lines, key=attrgetter("access_count"))
+        l = min(self.lines, key=attrgetter("access_time"))
         l.tag = tag
-        l.valid = True
         return l
 
     def replace_lfu(self, tag: int) -> CacheLine:
         l = min(self.lines, key=attrgetter("access_count"))
         l.tag = tag
-        l.valid = True
         l.access_count = 0  # been accessed one time
         return l
 
     def replace_fifo(self, tag: int) -> CacheLine:
         l = self.lines[self.fifo_pointer]
         l.tag = tag
-        l.valid = True
         self.fifo_pointer += 1
         if self.fifo_pointer == len(self.lines):
             self.fifo_pointer = 0
