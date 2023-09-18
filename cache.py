@@ -38,7 +38,7 @@ class DirectCache(Cache):
         super(DirectCache, self).__init__(block_size, cache_size, memory_size)
         self.lines = [CacheLine() for _ in range(self.num_of_lines)]
     
-    def read(self, address: int) -> tuple[int, bool]:
+    def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
         page = address // self.block_size
         # makes the line number (right hand side of bits)
@@ -70,7 +70,7 @@ class AssociativeCache(Cache):
         page_number = address // self.block_size
         # call read method in cacheset
         hit = self.lines.read(page_number, time)
-        if not hit:
+        if not hit and self.lines.is_full:
             self.replace_count += 1
 
         return page_number, hit
@@ -101,7 +101,7 @@ class SetAssociativeCache(Cache):
         s = self.sets[set_index]
         hit = s.read(tag, time)
 
-        if not hit:
+        if not hit and s.is_full:
             self.replace_count += 1
         return page, hit
 
