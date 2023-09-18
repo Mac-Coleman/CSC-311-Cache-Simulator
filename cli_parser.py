@@ -21,6 +21,7 @@ class OptionDict(TypedDict):
     no_color: bool
     k: int
     replacement: str
+    access_pattern: str
     quiet: bool
 
 number_help = "NUMBER INTERPRETATION:\n" \
@@ -54,6 +55,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     block_size = "4KB"
     cache_size = "32KB"
     replacement = "lru"
+    access_pattern = "random"
 
     run_help = get_flag_presence(args, consumed, "--help", "-h")
     run_version = get_flag_presence(args, consumed, "--version", "-v")
@@ -72,6 +74,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
     k_parsed = get_option_value(args, consumed, "--ways", "-k")
     replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
+    access_pattern_parsed = get_option_value(args, consumed, "--access-pattern", "-a")
 
     no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
     quiet = get_flag_presence(args, consumed, "--quiet", "-q")
@@ -167,6 +170,20 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
             print("\tfifo\tfirst in first out")
             print("\trandom\trandom")
             sys.exit(1)
+    
+    access_patterns = ["random", "full-sequential", "random-pages"]
+
+    if access_pattern_parsed is not None:
+        if access_pattern_parsed.lower() in access_patterns or access_pattern_parsed.lower().endswith(".log"):
+            access_pattern = access_pattern_parsed.lower()
+        else:
+            print(f"Error: access pattern unrecognized: '{access_pattern_parsed}'\n")
+            print("ACCESS PATTERNS:")
+            print("\trandom\tgenerate random addresses within memory")
+            print("\tfull-sequential\tread the entire address space sequentially")
+            print("\trandom-pages\tread the address space of randomly selected pages")
+            print("\t<file-name>\ta Valgrind Lackey .log file containing memory accesses by a process")
+            sys.exit(1)
 
     check_unconsumed(args, consumed)
 
@@ -179,7 +196,8 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         "no_color": no_colorize,
         "k": 0,
         "replacement": replacement,
-        "quiet": quiet
+        "quiet": quiet,
+        "access_pattern": access_pattern
     }
 
     if k_parsed is not None:
