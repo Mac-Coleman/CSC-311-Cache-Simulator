@@ -48,7 +48,7 @@ class AddressGenerator:
     def probability_based_locality(self):
         if(self.pointer==self.limit):
             self.pointer=self.get_random_page()
-            self.limit=-1# this is the case for the first call only, after that it should be based on probability
+            self.limit=-1# this is the case for the first call only, to stop the first page usually being 0
         else:
             if(random.random()>self.probability):
                 self.pointer=self.get_random_page()
@@ -59,6 +59,6 @@ class AddressGenerator:
 
 
 if __name__=="__main__":
-    ag=AddressGenerator(256,16,4)
+    ag=AddressGenerator(8096,256,4)
     for i in range(128):
         print(ag.generate_address())
