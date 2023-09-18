@@ -92,19 +92,39 @@ class AddressTraceGenerator:
     def open_file(self):
         self.file=open(self.file_name)
 
+    def close_file(self):
+        self.file.close()
+
     def generate_address(self):
         found=False
+        line1=None
         while found is not True:
             line=self.file.readline()
             if(line[0] != "=" and line[0] != "-"):
                 try:
                     line1=line.split(" ")[2].split(",")[0]
+                    found=True
                 except:
-                    print("bad input")
+                    print("bad input, ignoring "+line)
+                    # doesnt exit, trys to keep going and ignore the bad input
+        if(line1 is not None):
+            intLine=int(line1,16)
+            if(intLine>self.memory_size):
+                if(self.wrap_addresses):
+                    return intLine%self.memory_size
+                else:
+                    print("Invalid Memory Line: "+str(intLine))
                     sys.exit(1)
-                print(line1)
+            else:
+                return intLine
+        else:
+            print("Line not found")
+            sys.exit(1)
+                
             
 
 if __name__=="__main__":
-    ag=AddressTraceGenerator("./traces/hello_world.log",8096,True,600)
-    ag.generate_address()
+    ag=AddressTraceGenerator("./traces/hello_world.log",8096,False,600)
+    print(ag.generate_address())
+    print(ag.generate_address())    
+    print(ag.generate_address())
