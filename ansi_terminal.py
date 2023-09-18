@@ -22,5 +22,9 @@ def yellow():
     if cursor_color:
         print("\033[33m", end="")
 
+def blue():
+    if cursor_color:
+        print("\033[34m", end="")
+
 def reset():
     print("\033[0m", end="")

@@ -66,8 +66,29 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
 
     hit_ratio = hit_counter / total_counter
     replacements = cache.get_replacement_count()
+
+    print("\nRESULTS")
+    print("\t   Hit Ratio:    ", end="")
+    cursor.blue()
+    print(f"{hit_ratio * 100:06f}%")
+    cursor.reset()
+    print("\t        Hits:    ", end="")
+    cursor.blue()
+    print(hit_counter)
+    cursor.reset()
+    print("\t      Misses:    ", end="")
+    cursor.blue()
+    print(total_counter-hit_counter)
+    cursor.reset()
+    print("\t    Accesses:    ", end="")
+    cursor.blue()
+    print(total_counter)
+    cursor.reset()
+    print("\tReplacements:    ", end="")
+    cursor.blue()
+    print(replacements)
+    cursor.reset()
+
     output_builder.close_output()
-    output_builder.print_data(hit_ratio, replacements, 0)
-    #output builder make output from replacements and hit record
     output_builder.write_locality_file(locality, page_length)
-    output_builder.write_stats_file(hit_counter, total_counter, cache.get_replacement_count())
+    output_builder.write_stats_file(hit_counter, total_counter, replacements)
