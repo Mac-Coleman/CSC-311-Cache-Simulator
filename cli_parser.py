@@ -1,3 +1,7 @@
+"""
+Written by Mac
+"""
+
 from enum import Enum
 import sys
 from typing import cast, Callable, TypedDict

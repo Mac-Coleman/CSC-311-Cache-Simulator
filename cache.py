@@ -1,3 +1,10 @@
+"""
+Set-associative Cache class originally written by Brodie and Mac
+
+Refactored into inheritance-based classes by Mac
+Brodie wrote replacement algorithms
+"""
+
 from dataclasses import dataclass
 from operator import attrgetter
 import math
@@ -125,6 +132,7 @@ class SetAssociativeCache(Cache):
 
 def is_power_of_two(num: int) -> bool:
     # For any power of two, its binary interpretation can have exactly one set bit.
+    # Written by Mac
     return num.bit_count() == 1
 
 @dataclass
