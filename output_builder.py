@@ -24,9 +24,14 @@ class OutputBuilder:
             for page in pages:
                 f.write("{0:{width}x}: {1}\n".format(page, locality[page], width=page_length))
 
-
-
-
+    def write_stats_file(self, hits: int, total: int, replacements: int):
+        with open("stats.txt", "w") as f:
+            f.write(f"Hit ratio: {hits/total * 100:06f}%\n")
+            f.write(f"Hits: {hits}\n")
+            f.write(f"Misses: {total - hits}\n")
+            f.write(f"Accesses: {total}\n")
+            f.write(f"Replacements: {replacements}\n")
+    
     ### Writes a new line to the file
     def add(self, index, result):
         if result:

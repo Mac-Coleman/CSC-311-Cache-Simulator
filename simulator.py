@@ -70,3 +70,4 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     output_builder.print_data(hit_ratio, replacements, 0)
     #output builder make output from replacements and hit record
     output_builder.write_locality_file(locality, page_length)
+    output_builder.write_stats_file(hit_counter, total_counter, cache.get_replacement_count())
