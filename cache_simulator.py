@@ -23,6 +23,7 @@ help_string = f"\n{program_name} {version}\n\n" \
     "Simulate reads and writes to a cache.\n\n" \
     "Options:\n" \
     " -a, --access-pattern <pattern>  the access pattern to use\n" \
+    "                                 can be a path to a Valgrind Lackey trace file\n" \
     " -b, --block-size <size>         block, page, frame, line size\n" \
     "                                 default: 4KB\n" \
     " -c, --cache-size <size>         size of the cache\n" \
