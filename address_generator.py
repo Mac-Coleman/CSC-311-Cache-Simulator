@@ -1,5 +1,6 @@
 #Author: Torii Greiskalns
 import random
+import sys
 
 class AddressGenerator:
     def __init__(self,ms:int,page_size:int,pattern:int):
@@ -16,6 +17,7 @@ class AddressGenerator:
             3:self.full_ram_sequential,
             4:self.probability_based_locality,
         }
+
     def generate_address(self):
         return self.patternDict.get(self.pattern)()
     
@@ -54,13 +56,13 @@ class AddressGenerator:
         return self.pointer
     
     def probability_based_locality(self):
-        if(self.pointer == self.limit):
-            self.pointer = self.get_random_page()
-            self.limit = -1# this is the case for the first call only, to stop the first page usually being 0
+        if(self.pointer==self.limit):
+            self.pointer=self.get_random_page()
+            self.limit=-1# this is the case for the first call only, to stop the first page usually being 0
         else:
-            if(random.random() > self.probability):
-                self.pointer = self.get_random_page()
-        return random.randint(self.pointer, self.pointer + self.page_size-1)
+            if(random.random()>self.probability):
+                self.pointer=self.get_random_page()
+        return random.randint(self.pointer,self.pointer+self.page_size-1)
 
 class AddressTraceGenerator:
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
@@ -84,10 +86,19 @@ class AddressTraceGenerator:
         """
     def open_file(self):
         self.file=open(self.file_name)
+
     def generate_address(self):
         found=False
         while found is not True:
-            print(self.file.readline())
+            line=self.file.readline()
+            if(line[0] != "=" and line[0] != "-"):
+                try:
+                    line1=line.split(" ")[2].split(",")[0]
+                except:
+                    print("bad input")
+                    sys.exit(1)
+                print(line1)
+            
 
 if __name__=="__main__":
     ag=AddressTraceGenerator("./traces/hello_world.log",8096,True,600)
