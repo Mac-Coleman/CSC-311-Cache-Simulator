@@ -12,13 +12,19 @@ class Cache:
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
 
         if not is_power_of_two(block_size):
-            raise ValueError("Block size must be a power of two!")
+            raise ValueError(f"Invalid block size: {block_size}. Block size must be a power of two!")
         
         if not is_power_of_two(cache_size):
-            raise ValueError("Cache size must be a power of two!")
+            raise ValueError(f"Invalid cache size: {cache_size}. Cache size must be a power of two!")
         
         if not is_power_of_two(memory_size):
-            raise ValueError("Memory size must be a power of two!")
+            raise ValueError(f"Invalid memory size: {memory_size}. Memory size must be a power of two!")
+    
+        if block_size > cache_size:
+            raise ValueError(f"Invalid block size. Block size must be less than or equal to cache size.")
+
+        if cache_size > memory_size:
+            raise ValueError(f"Invalid cache size: Cache size must be less than or equal to memory size.")
         
         self.block_size = block_size
         self.cache_size = cache_size
