@@ -38,7 +38,7 @@ def simulate(options: OptionDict):
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
-    address_maker = AddressGenerator(options["memory_size"], options["block_size"], 0)
+    address_maker = AddressGenerator(options["memory_size"], options["block_size"], 4)
     address_length = math.ceil(math.log(options["memory_size"], 16))
     page_length = math.ceil(math.log(options["memory_size"] // options["block_size"], 16))
 

@@ -182,5 +182,4 @@ class CacheSet:
     def replace_random(self, tag: int) -> CacheLine:
         l = random.choice(self.lines)
         l.tag = tag
-        l.valid = True
         return l
