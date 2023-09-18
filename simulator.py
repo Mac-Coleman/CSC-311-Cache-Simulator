@@ -1,5 +1,5 @@
 
-from address_generator import AddressGenerator
+from address_generator import AddressGenerator, AddressTraceGenerator
 from cache import Cache, DirectCache, AssociativeCache, SetAssociativeCache, is_power_of_two
 from output_builder import OutputBuilder
 import ansi_terminal as cursor
@@ -37,10 +37,28 @@ def simulate(options: OptionDict):
         print(e)
         sys.exit(1)
 
+    address_maker = None
+
+    try:
+        match options["access_pattern"]:
+            case "random":
+                address_maker = AddressGenerator(options["memory_size"], options["block_size"], 0)
+            case "random-pages":
+                address_maker = AddressGenerator(options["memory_size"], options["block_size"], 1)
+            case "full-sequential":
+                address_maker = AddressGenerator(options["memory_size"], options["block_size"], 3)
+            case _:
+                address_maker = AddressTraceGenerator(options["access_pattern"], options["memory_size"], True, options["reads"])
+    except FileNotFoundError:
+        print(f"Error: The file {options['access_pattern']} could not be found!")
+        sys.exit(1)
+
+
+
     output_builder = OutputBuilder()
     hit_counter = 0
     total_counter = 0
-    address_maker = AddressGenerator(options["memory_size"], options["block_size"], 4)
+
     address_length = math.ceil(math.log(options["memory_size"], 16))
     page_length = math.ceil(math.log(options["memory_size"] // options["block_size"], 16))
 
@@ -52,7 +70,11 @@ def simulate(options: OptionDict):
     start = time.perf_counter()
 
     for i in range(options["reads"]):
-        address = address_maker.generate_address()
+
+        try:
+            address = address_maker.generate_address()
+        except StopIteration:
+            break
 
         page, hit = cache.read(address, i)
         #output_builder.add(i, hit)
