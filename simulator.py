@@ -24,14 +24,16 @@ def simulate(options: OptionDict):
                 raise KeyError(f"No such cache type: {options['cache_type']}")
     except ValueError as e:
         cursor.red()
-        print(f"Error: ", end="")
+        print(f"Error", end="")
         cursor.reset()
+        print(": ", end="")
         print(e)
         sys.exit(1)
     except KeyError as e:
         cursor.red()
-        print(f"Error: ", end="")
+        print(f"Error", end="")
         cursor.reset()
+        print(": ", end="")
         print(e)
         sys.exit(1)
 
