@@ -79,8 +79,8 @@ class AssociativeCache(Cache):
         # removes word offset
         page_number = address >> self.offset_length
         # call read method in cacheset
-        hit = self.lines.read(page_number, time)
-        if not hit and self.lines.is_full:
+        hit, replacement = self.lines.read(page_number, time)
+        if not hit and replacement:
             self.replace_count += 1
 
         return page_number, hit
@@ -115,10 +115,12 @@ class SetAssociativeCache(Cache):
         tag = page >> self.set_number_length
 
         s = self.sets[set_index]
-        hit = s.read(tag, time)
+        hit, replacement = s.read(tag, time)
 
-        if not hit and s.is_full:
+        # replacement happens
+        if not hit and replacement:
             self.replace_count += 1
+
         return page, hit
 
 def is_power_of_two(num: int) -> bool:
@@ -156,23 +158,22 @@ class CacheSet:
         """
         Returns Bool, whether line was replaced or not
         """
-        cl = self.lines[self.lines.index(tag)] if tag in self.lines else None
-        flag = True
+        # Section for Cache Hit
+        hit = tag in self.lines
+        if hit:
+            cl = self.lines[self.lines.index(tag)]
+            return hit, False
         
-        if cl == None:
-            flag = False
-            if self.is_full:
-                cl = self.replacement_algorithm(tag)
-            else:
-                cl = self.lines[self.next_available]
-                cl.valid = True
-                self.next_available += 1
-                self.is_full = self.next_available == self.length
-            
-        # updates chosen line information
-        cl.access_count += 1
-        cl.access_time = time
-        return flag
+        # Section for Cache miss / Replacement
+        if self.is_full:
+            cl = self.replacement_algorithm(tag)
+            return hit, True
+        else:
+            cl = self.lines[self.next_available]
+            cl.valid = True
+            self.next_available += 1
+            self.is_full = self.next_available == self.length
+            return hit, False
    
 
     def replace_lru(self, tag: int) -> CacheLine:
