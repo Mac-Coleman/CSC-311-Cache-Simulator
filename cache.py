@@ -3,6 +3,7 @@ Set-associative Cache class originally written by Brodie and Mac
 
 Refactored into inheritance-based classes by Mac
 Brodie wrote replacement algorithms
+Changes to bitwise operations by Mac
 """
 
 from dataclasses import dataclass
@@ -69,8 +70,10 @@ class DirectCache(Cache):
 
         if not hit:
             cl.tag = tag
+            if cl.valid:
+                self.replace_count += 1
             cl.valid = True
-            self.replace_count += 1
+            
         cl.access_count += 1
 
         return page, hit
@@ -162,7 +165,7 @@ class CacheSet:
         }
         self.replacement_algorithm = algo_dict[replacement_algorithm]
     
-    def read(self, tag: int, time: int) -> bool:
+    def read(self, tag: int, time: int) -> tuple[bool, bool]:
         """
         Returns Bool, whether line was replaced or not
         """

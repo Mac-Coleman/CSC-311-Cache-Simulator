@@ -69,7 +69,7 @@ class AddressGenerator:
                 self.pointer=self.get_random_page()
         return random.randint(self.pointer,self.pointer+self.page_size-1)
 
-class AddressTraceGenerator:
+class AddressTraceGenerator(AddressGenerator):
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
         self.pointer=0
         self.file_name=file_name
@@ -100,7 +100,11 @@ class AddressTraceGenerator:
         line1=None
         while found is not True:
             line=self.file.readline()
-            if(line[0] != "=" and line[0] != "-"):
+
+            if not line:
+                raise StopIteration
+            
+            if not line.startswith(("=", "-")):
                 try:
                     line1=line.split(" ")[2].split(",")[0]
                     found=True
