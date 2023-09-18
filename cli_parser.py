@@ -201,7 +201,7 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     Retrieves the value for an option from a list. Returns None if not present.
     long: The long-form name of the option. (e.g. "--block-size")
     short: the short-form name of the option. (e.g. "-b")
-    Consumes elements from args by removing them when they are found.
+    Consumes elements from args by marking them as consumed when they are found.
     """
 
     option_style = get_option_index(args, long, short)
@@ -273,7 +273,7 @@ def str_to_size(string: str) -> int:
     """
 
     if len(string) == 0:
-        raise ValueError()
+        raise ValueError("No value was found before the multiplier.")
 
     suffix_start: int = 0
 
