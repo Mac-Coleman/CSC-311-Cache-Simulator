@@ -70,8 +70,10 @@ class DirectCache(Cache):
 
         if not hit:
             cl.tag = tag
+            if cl.valid:
+                self.replace_count += 1
             cl.valid = True
-            self.replace_count += 1
+            
         cl.access_count += 1
 
         return page, hit
