@@ -19,6 +19,17 @@ class OptionDict(TypedDict):
     replacement: str
     quiet: bool
 
+number_help = "NUMBER INTERPRETATION:\n" \
+    "\tNumbers can be passed on the command line as either\n" \
+    "\tinteger literals or with SI multipliers. You can\n" \
+    "\tspecify a number by writing out all of its digits,\n" \
+    "\tor by writing a number with a multiplier suffix.\n\n" \
+    "EXAMPLES:\n" \
+    "\t256  -> 256\n" \
+    "\t512B -> 512\n" \
+    "\t256K -> 262144\n" \
+    "\t  1G -> 1073741823\n"
+
 def parse_arguments(args: list[str], help_handler: Callable, version_handler: Callable, run_handler: Callable):
 
     # Positional:
@@ -92,7 +103,18 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         cache_size = cache_size_parsed
 
     cache_type = positionals[0].lower()
-    reads = str_to_size(positionals[1])
+    reads = 0
+    
+    try:
+        reads = str_to_size(positionals[1])
+    except ValueError as e:
+        print(f"Error: could not interpret number of reads: {positionals[1]}")
+        print(number_help)
+        sys.exit(1)
+    except KeyError as e:
+        print(f"Error: could not interpret number of reads: {positionals[1]}")
+        print(number_help)
+        sys.exit(1)
 
     type_dict: dict[str, str] = {
         "direct": "direct",
