@@ -22,15 +22,18 @@ help_string = f"\n{program_name} {version}\n\n" \
     "  python {executing_file_name} [options] <cache-type> <reads>\n\n" \
     "Simulate reads and writes to a cache.\n\n" \
     "Options:\n" \
-    " -b, --block-size <size>  block, page, frame, line size\n" \
-    "                          default: 4KB\n" \
-    " -c, --cache-size <size>  size of the cache\n" \
-    "                          default: 32KB\n" \
-    " -h, --help               display this help message\n" \
-    " -k, --ways <set-size>    the size of each set in a set-associative cache\n" \
-    " -m, --memory-size <size> physical memory size\n" \
-    "                          default: 256MB\n" \
-    " -v, --version            display version\n" \
+    " -b, --block-size <size>        block, page, frame, line size\n" \
+    "                                default: 4KB\n" \
+    " -c, --cache-size <size>        size of the cache\n" \
+    "                                default: 32KB\n" \
+    " -h, --help                     display this help message\n" \
+    " -k, --ways <set-size>          the size of each set in a set-associative cache\n" \
+    " -m, --memory-size <size>       physical memory size\n" \
+    "                                default: 256MB\n" \
+    " -n, --no-color                 disable colored output\n" \
+    " -q, --quiet                    suppress progress display\n" \
+    " -r, --replacement <algorithm>  replacement algorithm to use in caches with associativity\n" \
+    " -v, --version                  display version\n" \
     
 
 def main():

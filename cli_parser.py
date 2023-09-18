@@ -1,12 +1,23 @@
 from enum import Enum
 import sys
-from typing import cast, Callable
+from typing import cast, Callable, TypedDict
 
 class OptionFormat(Enum):
     COMBINED_SHORT = 0
     COMBINED_LONG = 1
     SEPARATE_SHORT = 2
     SEPARATE_LONG = 3
+
+class OptionDict(TypedDict):
+    cache_type: str
+    memory_size: int
+    block_size: int
+    cache_size: int
+    reads: int
+    no_color: bool
+    k: int
+    replacement: str
+    quiet: bool
 
 def parse_arguments(args: list[str], help_handler: Callable, version_handler: Callable, run_handler: Callable):
 
@@ -27,6 +38,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     memory_size = "256MB"
     block_size = "4KB"
     cache_size = "32KB"
+    replacement = "lru"
 
     run_help = get_flag_presence(args, consumed, "--help", "-h")
     run_version = get_flag_presence(args, consumed, "--version", "-v")
@@ -44,7 +56,10 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
     cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
     k_parsed = get_option_value(args, consumed, "--ways", "-k")
+    replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
+
     no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
+    quiet = get_flag_presence(args, consumed, "--quiet", "-q")
 
     # Unconsumed arguments are positionals.
     positionals: list[str] = []
@@ -79,8 +94,6 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     cache_type = positionals[0].lower()
     reads = str_to_size(positionals[1])
 
-    lines = (str_to_size(cache_size) // str_to_size(block_size))
-
     type_dict: dict[str, str] = {
         "direct": "direct",
         "d": "direct",
@@ -109,15 +122,38 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         print("Error: set size is required when using a set-associative cache!")
         print("You must add the --ways or -k flag, or switch to a different type of cache.")
         sys.exit(1)
+    
+    if replacement_parsed is not None and cache_type == "direct":
+        print("Error: No replacement algorithm can be specified when using a direct cache!")
+        print("You must remove the -r or --replacement options, or switch to a different cache type.")
+        sys.exit(1)
+    
+    replacement_types = ["lru", "lfu", "fifo", "random"]
+    
+    if replacement_parsed is not None:
+        if replacement_parsed.lower() in replacement_types:
+            replacement = replacement_parsed.lower()
+        else:
+            print("Error: Replacement algorithm unrecognized: '{replacement_parsed}'\n")
+            print("REPLACEMENT ALGORITHMS:")
+            print("\tlru\tLeast recently used")
+            print("\tlfu\tLeast frequently used")
+            print("\tfifo\tfirst in first out")
+            print("\trandom\trandom")
+            sys.exit(1)
 
     check_unconsumed(args, consumed)
 
-    options: dict[str, int | bool] = {
+    options: OptionDict = {
+        "cache_type": cache_type,
         "memory_size": str_to_size(memory_size),
         "block_size": str_to_size(block_size),
         "cache_size": str_to_size(cache_size),
         "reads": reads,
-        "no_color": no_colorize
+        "no_color": no_colorize,
+        "k": 0,
+        "replacement": replacement,
+        "quiet": quiet
     }
 
     if k_parsed is not None:
@@ -169,7 +205,7 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     
     index = option_style[1]+1
     if index >= len(args):
-        raise ValueError(f"Option {option_style[1]} was given but no value was specified.")
+        raise ValueError(f"Option {args[option_style[1]]} was given but no value was specified.")
     
     if consumed[index]:
         return None
