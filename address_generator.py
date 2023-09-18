@@ -2,7 +2,7 @@ import random
 
 class AddressGenerator:
     def __init__(self,ms:int,page_size:int,pattern:int):
-        self.probability=.2
+        self.probability=.35
         self.pattern=pattern
         self.max_size=ms
         self.pointer=0
@@ -54,7 +54,19 @@ class AddressGenerator:
                 self.pointer=self.get_random_page()
         return random.randint(self.pointer,self.pointer+self.page_size-1)
 
+class AddressTraceGenerator:
+    def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
+        """
+        Opens file 'file_name' and read it line by line.
+        Get the address from each line, ignore lines starting with "--" or "=="
+        Split each line by " ", take second element and split by ","
+        First element of that result is the address.
 
+        Wrap addresses within memory_size if wrap_addresses is true, otherwise
+        throw error.
+
+        Read only max_length addresses from file.
+        """
 
 
 

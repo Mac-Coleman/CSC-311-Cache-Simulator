@@ -166,3 +166,6 @@ cython_debug/
 hit_and_miss.txt
 locality.txt
 stats.txt
+
+# Traces
+!traces/*.log
