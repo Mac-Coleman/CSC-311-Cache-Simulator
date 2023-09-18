@@ -123,8 +123,11 @@ class CacheLine:
 
 class CacheSet:
     def __init__(self, lines, replacement_algorithm):
+        self.length = lines
         self.lines = [CacheLine() for x in range(lines)]
         self.fifo_pointer = 0
+        self.next_available = 0
+        self.is_full = False
         algo_dict = {
             "lru": self.replace_lru,
             "lfu" : self.replace_lfu,
@@ -142,11 +145,17 @@ class CacheSet:
 
         if cl == None:
             flag = False
-            cl = self.replacement_algorithm(tag)
-        
+            if self.is_full:
+                cl = self.replacement_algorithm(tag)
+            else:
+                cl = self.lines[self.next_available]
+                next_available += 1
+                self.is_full = next_available == self.lines
+            
         cl.access_count += 1
         return flag
-    
+   
+
     def replace_lru(self, tag: int) -> CacheLine:
         l = min(self.lines, key=attrgetter("access_count"))
         l.tag = tag
