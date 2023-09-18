@@ -161,42 +161,42 @@ class CacheSet:
         # Section for Cache Hit
         hit = tag in self.lines
         if hit:
-            cl = self.lines[self.lines.index(tag)]
+            chosen_line = self.lines[self.lines.index(tag)]
             return hit, False
         
         # Section for Cache miss / Replacement
         if self.is_full:
-            cl = self.replacement_algorithm(tag)
+            chosen_line = self.replacement_algorithm(tag)
             return hit, True
         else:
-            cl = self.lines[self.next_available]
-            cl.valid = True
+            chosen_line = self.lines[self.next_available]
+            chosen_line.valid = True
             self.next_available += 1
             self.is_full = self.next_available == self.length
             return hit, False
    
 
     def replace_lru(self, tag: int) -> CacheLine:
-        l = min(self.lines, key=attrgetter("access_time"))
-        l.tag = tag
-        return l
+        line = min(self.lines, key=attrgetter("access_time"))
+        line.tag = tag
+        return line
 
     def replace_lfu(self, tag: int) -> CacheLine:
-        l = min(self.lines, key=attrgetter("access_count"))
-        l.tag = tag
-        l.access_count = 0  # been accessed one time
-        return l
+        line = min(self.lines, key=attrgetter("access_count"))
+        line.tag = tag
+        line.access_count = 0  # been accessed one time
+        return line
 
     def replace_fifo(self, tag: int) -> CacheLine:
-        l = self.lines[self.fifo_pointer]
-        l.tag = tag
+        line = self.lines[self.fifo_pointer]
+        line.tag = tag
         self.fifo_pointer += 1
         if self.fifo_pointer == len(self.lines):
             self.fifo_pointer = 0
 
-        return l
+        return line
         
     def replace_random(self, tag: int) -> CacheLine:
-        l = random.choice(self.lines)
-        l.tag = tag
-        return l
+        line = random.choice(self.lines)
+        line.tag = tag
+        return line
