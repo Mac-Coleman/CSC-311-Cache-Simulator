@@ -45,9 +45,9 @@ def simulate(options: OptionDict):
     locality: dict[int, int] = {}
     reads = options["reads"]
 
-    start = time.perf_counter()
+    print("\n\n")
 
-    print("\n")
+    start = time.perf_counter()
 
     for i in range(options["reads"]):
         address = address_maker.generate_address()
@@ -63,7 +63,7 @@ def simulate(options: OptionDict):
             cursor.move_up()
             cursor.move_up()
             cursor.erase()
-            print("\rA: {a:0{width}x}\t".format(a=address, width=address_length), end="")
+            print("\rA: {a:0{width}x}\t  ".format(a=address, width=address_length), end="")
             cursor.green() if hit else cursor.red()
             print(f"{'hit ' if hit else 'miss'}", end="")
             cursor.reset()
@@ -72,7 +72,7 @@ def simulate(options: OptionDict):
             cursor.erase()
             print("[", end="")
             cursor.yellow()
-            print(f"{'='*math.floor(i/reads * 20)}{' '*math.ceil((1 - (i/reads)) * 20)}", end="")
+            print(f"{'='*math.ceil(i/reads * 20)}{' '*math.floor((1 - (i/reads)) * 20)}", end="")
             cursor.reset()
             print(f"] Progress: {i/reads * 100:0.2f}%", end="\n")
     
@@ -81,7 +81,7 @@ def simulate(options: OptionDict):
     cursor.move_up()
     cursor.move_up()
     cursor.erase()
-    print("\rA: {a:0{width}x}\t".format(a=address, width=address_length), end="")
+    print("\rA: {a:0{width}x}\t  ".format(a=address, width=address_length), end="")
     cursor.green() if hit else cursor.red()
     print(f"{'hit ' if hit else 'miss'}", end="")
     cursor.reset()
@@ -90,7 +90,7 @@ def simulate(options: OptionDict):
     cursor.erase()
     print("[", end="")
     cursor.green()
-    print(f"{'='*math.floor(i/reads * 20)}{' '*math.ceil((1 - (i/reads)) * 20)}", end="")
+    print(f"{'='*20}", end="")
     cursor.reset()
     print(f"] Progress: Finished!", end="\n")
 
