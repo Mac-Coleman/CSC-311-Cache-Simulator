@@ -13,9 +13,10 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     hit_counter = 0
     total_counter = 0
     address_maker = AddressGenerator(max_size, page_size, 0)
-
     address_length = math.ceil(math.log(max_size, 16))
+    page_length = math.ceil(math.log(max_size // page_size, 16))
 
+    locality: dict[int, int] = {}
     start = time.perf_counter()
 
     print("\n")
@@ -25,6 +26,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
 
         page, hit = cache.read(address)
         #output_builder.add(i, hit)
+        locality[page] = locality.get(page, 0) + 1
 
         hit_counter += int(hit)
         total_counter += 1
@@ -42,7 +44,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
             cursor.erase()
             print("[", end="")
             cursor.yellow()
-            print(f"{'='*int(i/reads * 20)}{' '*int((1 - (i/reads)) * 20)}", end="")
+            print(f"{'='*math.floor(i/reads * 20)}{' '*math.ceil((1 - (i/reads)) * 20)}", end="")
             cursor.reset()
             print(f"] Progress: {i/reads * 100:0.2f}%", end="\n")
     
@@ -58,7 +60,7 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     cursor.erase()
     print("[", end="")
     cursor.green()
-    print(f"{'='*int(i/reads * 20)}{' '*int((1 - (i/reads)) * 20)}", end="")
+    print(f"{'='*math.floor(i/reads * 20)}{' '*math.ceil((1 - (i/reads)) * 20)}", end="")
     cursor.reset()
     print(f"] Progress: Finished!", end="\n")
 
@@ -66,4 +68,5 @@ def simulate(max_size:int, page_size:int, cache_size:int, set_size:int, reads:in
     replacements = cache.get_replacement_count()
     output_builder.close_output()
     output_builder.print_data(hit_ratio, replacements, 0)
-    #output builder make output from replacements and hit record 
+    #output builder make output from replacements and hit record
+    output_builder.write_locality_file(locality, page_length)

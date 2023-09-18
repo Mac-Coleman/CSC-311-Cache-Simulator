@@ -19,7 +19,7 @@ class AddressGenerator:
         return random.randint(0,self.max_size//self.page_size-1)*self.page_size
     #different algorithms for generating input patterns 
     def random(self):
-        return random.randint(0,self.max_size)
+        return random.randint(0,self.max_size-1)
     def read_full_page(self):
         if(self.pointer==self.limit):
             self.pointer=self.get_random_page()

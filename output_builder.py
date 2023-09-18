@@ -17,6 +17,15 @@ class OutputBuilder:
     ### Closes a file
     def close_output(self):
         self.output_file.close()
+    
+    def write_locality_file(self, locality: dict[int, int], page_length: int):
+        with open("locality.txt", "w", encoding='utf-8') as f:
+            pages = sorted(locality.keys())
+            for page in pages:
+                f.write("{0:{width}x}: {1}\n".format(page, locality[page], width=page_length))
+
+
+
 
     ### Writes a new line to the file
     def add(self, index, result):
