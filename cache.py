@@ -45,6 +45,11 @@ class Cache:
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         pass
+
+    def validate(self, address: int) -> None:
+        if address >= self.memory_size:
+            print(address)
+            raise ValueError("Attempted to access an address larger than memory!")
     
     def get_replacement_count(self) -> int:
         return self.replace_count
@@ -57,6 +62,7 @@ class DirectCache(Cache):
         self.line_number_bitmask = 2**self.line_number_length - 1
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
+        self.validate(address)
         # removes word offset
         page = address >> self.offset_length
         # makes the line number (right hand side of bits)
@@ -86,6 +92,7 @@ class AssociativeCache(Cache):
         self.lines = CacheSet(self.num_of_lines, replacement_algorithm)
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
+        self.validate(address)
         # removes word offset
         page_number = address >> self.offset_length
         # call read method in cacheset
@@ -117,6 +124,7 @@ class SetAssociativeCache(Cache):
         self.set_number_bitmask = 2**self.set_number_length - 1
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
+        self.validate(address)
         # removes word offset
         page = address >> self.offset_length
         # takes the set (right hand side of page)

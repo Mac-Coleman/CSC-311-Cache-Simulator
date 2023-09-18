@@ -23,15 +23,18 @@ class OutputBuilder:
     
     def write_locality_file(self, locality: dict[int, int], page_length: int):
         """
+        Writes each page number and its accesses to the file `Locality.txt`
         Written by Mac
         """
         with open("locality.txt", "w", encoding='utf-8') as f:
             pages = sorted(locality.keys())
             for page in pages:
-                f.write("{0:{width}x}: {1}\n".format(page, locality[page], width=page_length))
+                f.write("{0:0{width}x}: {1}\n".format(page, locality[page], width=page_length))
+
 
     def write_stats_file(self, hits: int, total: int, replacements: int):
         """
+        Outputs runtime statistics to the file `stats.txt`
         Written by Mac
         """
         with open("stats.txt", "w") as f:

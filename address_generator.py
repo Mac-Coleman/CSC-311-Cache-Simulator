@@ -1,4 +1,5 @@
 #Author: Torii Greiskalns
+import math
 import random
 import sys
 
@@ -71,13 +72,15 @@ class AddressGenerator:
 
 class AddressTraceGenerator(AddressGenerator):
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
-        self.pointer=0
+
         self.file_name=file_name
         self.memory_size=memory_size
         self.wrap_addresses=wrap_addresses
         self.max_length=max_length
         self.file=None
         self.open_file()
+
+        self.address_bitmask = math.ceil(math.log(memory_size, 2)) - 1
         """
         Opens file 'file_name' and read it line by line.
         Get the address from each line, ignore lines starting with "--" or "=="
@@ -96,9 +99,7 @@ class AddressTraceGenerator(AddressGenerator):
         self.file.close()
 
     def generate_address(self):
-        found=False
-        line1=None
-        while found is not True:
+        while True:
             line=self.file.readline()
 
             if not line:
@@ -106,8 +107,7 @@ class AddressTraceGenerator(AddressGenerator):
             
             if not line.startswith(("=", "-")):
                 try:
-                    line1=line.split(" ")[2].split(",")[0]
-                    found=True
+                    return int(line.split(" ")[2].split(",")[0], 16) & self.address_bitmask
                 except:
                     print("bad input, ignoring "+line)
                     # doesnt exit, trys to keep going and ignore the bad input
