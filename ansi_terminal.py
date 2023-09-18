@@ -1,3 +1,7 @@
+"""
+Written by Mac
+"""
+
 cursor_color = False
 
 def setup(no_color: bool):
