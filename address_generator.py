@@ -17,13 +17,17 @@ class AddressGenerator:
         }
     def generate_address(self):
         return self.patternDict.get(self.pattern)()
+    
     def get_random_page(self):
         return random.randint(0,self.max_size//self.page_size-1)*self.page_size
+    
     def set_probability(self,prob:int):
         self.probability=prob
+
     #different algorithms for generating input patterns 
     def random(self):
         return random.randint(0,self.max_size-1)
+    
     def read_full_page(self):
         if(self.pointer==self.limit):
             self.pointer=self.get_random_page()
@@ -31,6 +35,7 @@ class AddressGenerator:
         else:
             self.pointer+=1
         return self.pointer
+    
     def random_sequential(self):
         if(self.pointer==self.limit):
             self.pointer=random.randint(0,self.max_size-1)
@@ -38,6 +43,7 @@ class AddressGenerator:
         else:
             self.pointer+=1
         return self.pointer
+    
     def full_ram_sequential(self):
         if(self.pointer==self.limit):
             self.pointer=0
@@ -45,14 +51,15 @@ class AddressGenerator:
         else:
             self.pointer+=1
         return self.pointer
+    
     def probability_based_locality(self):
-        if(self.pointer==self.limit):
-            self.pointer=self.get_random_page()
-            self.limit=-1# this is the case for the first call only, to stop the first page usually being 0
+        if(self.pointer == self.limit):
+            self.pointer = self.get_random_page()
+            self.limit = -1# this is the case for the first call only, to stop the first page usually being 0
         else:
-            if(random.random()>self.probability):
-                self.pointer=self.get_random_page()
-        return random.randint(self.pointer,self.pointer+self.page_size-1)
+            if(random.random() > self.probability):
+                self.pointer = self.get_random_page()
+        return random.randint(self.pointer, self.pointer + self.page_size-1)
 
 class AddressTraceGenerator:
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
