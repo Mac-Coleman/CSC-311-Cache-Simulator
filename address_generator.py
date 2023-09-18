@@ -1,3 +1,4 @@
+#Author: Torii Greiskalns
 import random
 
 class AddressGenerator:
@@ -56,6 +57,13 @@ class AddressGenerator:
 
 class AddressTraceGenerator:
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
+        self.pointer=0
+        self.file_name=file_name
+        self.memory_size=memory_size
+        self.wrap_addresses=wrap_addresses
+        self.max_length=max_length
+        self.file=None
+        self.open_file()
         """
         Opens file 'file_name' and read it line by line.
         Get the address from each line, ignore lines starting with "--" or "=="
@@ -67,10 +75,13 @@ class AddressTraceGenerator:
 
         Read only max_length addresses from file.
         """
-
-
+    def open_file(self):
+        self.file=open(self.file_name)
+    def generate_address(self):
+        found=False
+        while found is not True:
+            print(self.file.readline())
 
 if __name__=="__main__":
-    ag=AddressGenerator(8096,256,4)
-    for i in range(128):
-        print(ag.generate_address())
+    ag=AddressTraceGenerator("./traces/hello_world.log",8096,True,600)
+    ag.generate_address()
