@@ -142,7 +142,7 @@ class CacheSet:
         """
         cl = self.lines[self.lines.index(tag)] if tag in self.lines else None
         flag = True
-
+        
         if cl == None:
             flag = False
             if self.is_full:
@@ -150,8 +150,8 @@ class CacheSet:
             else:
                 cl = self.lines[self.next_available]
                 cl.valid = True
-                next_available += 1
-                self.is_full = next_available == self.lines
+                self.next_available += 1
+                self.is_full = self.next_available == self.length
             
         # updates chosen line information
         cl.access_count += 1
