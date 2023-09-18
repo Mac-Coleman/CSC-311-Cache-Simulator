@@ -39,14 +39,16 @@ class DirectCache(Cache):
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
         super(DirectCache, self).__init__(block_size, cache_size, memory_size)
         self.lines = [CacheLine() for _ in range(self.num_of_lines)]
+        self.line_number_length = int(math.log(self.num_of_lines, 2))
+        self.line_number_bitmask = 2**self.line_number_length - 1
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
         page = address >> self.offset_length
         # makes the line number (right hand side of bits)
-        line = page % self.num_of_lines
+        line = page & self.line_number_bitmask
         # makes the tag (left hand side of bits)
-        tag = page // self.num_of_lines
+        tag = page >> self.line_number_length
 
         # chosen line
         cl = self.lines[line]
@@ -83,22 +85,28 @@ class SetAssociativeCache(Cache):
         super(SetAssociativeCache, self).__init__(block_size, cache_size, memory_size)
 
         if not is_power_of_two(set_size):
-            raise ValueError("Set size 'k' must be a power of two!")
+            raise ValueError(f"Invalid set size: {set_size}. Set size 'k' must be a power of two!")
         
         if set_size > self.num_of_lines:
-            raise ValueError(f"Set size must be less than or equal to the number of lines in the cache! Lines: {self.num_of_lines}")
+            raise ValueError(f"Invalid set size: {set_size}. Set size must be less than or equal to the number of lines in the cache! Lines: {self.num_of_lines}")
+        
+        if set_size <= 0:
+            raise ValueError(f"Invalid set size: {set_size}. Set size must be a positive, nonzero integer.")
         
 
         self.num_of_sets = self.num_of_lines // set_size
         self.sets = [CacheSet(set_size, replacement_algorithm) for x in range(self.num_of_sets)]
+
+        self.set_number_length = int(math.log(self.num_of_sets, 2))
+        self.set_number_bitmask = 2**self.set_number_length - 1
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
         page = address >> self.offset_length
         # takes the set (right hand side of page)
-        set_index = page % self.num_of_sets
+        set_index = page & self.set_number_bitmask
         # takes the tag (left hand side of page)
-        tag = page // self.num_of_sets
+        tag = page >> self.set_number_length
 
         s = self.sets[set_index]
         hit = s.read(tag, time)
