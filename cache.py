@@ -26,6 +26,8 @@ class Cache:
         self.replace_count = 0
 
         self.num_of_lines = self.cache_size // self.block_size
+
+        self.offset_length = int(math.log(block_size, 2))
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         pass
@@ -40,7 +42,7 @@ class DirectCache(Cache):
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
-        page = address // self.block_size
+        page = address >> self.offset_length
         # makes the line number (right hand side of bits)
         line = page % self.num_of_lines
         # makes the tag (left hand side of bits)
@@ -67,7 +69,7 @@ class AssociativeCache(Cache):
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
-        page_number = address // self.block_size
+        page_number = address >> self.offset_length
         # call read method in cacheset
         hit = self.lines.read(page_number, time)
         if not hit and self.lines.is_full:
@@ -92,7 +94,7 @@ class SetAssociativeCache(Cache):
     
     def read(self, address: int, time: int) -> tuple[int, bool]:
         # removes word offset
-        page = address // self.block_size
+        page = address >> self.offset_length
         # takes the set (right hand side of page)
         set_index = page % self.num_of_sets
         # takes the tag (left hand side of page)
