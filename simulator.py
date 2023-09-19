@@ -50,6 +50,11 @@ def simulate(options: OptionDict):
                 address_maker = AddressGenerator(options["memory_size"], options["block_size"], 1)
             case "full-sequential":
                 address_maker = AddressGenerator(options["memory_size"], options["block_size"], 3)
+            case "random-sequential":
+                address_maker = AddressGenerator(options["memory_size"], options["block_size"], 2)
+            case "probability":
+                address_maker = AddressGenerator(options["memory_size"], options["block_size"], 4)
+                address_maker.set_probability(options["probability"])
             case _:
                 address_maker = AddressTraceGenerator(options["access_pattern"], options["memory_size"], True, options["reads"])
     except FileNotFoundError:
