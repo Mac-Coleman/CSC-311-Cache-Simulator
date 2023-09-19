@@ -13,9 +13,11 @@ import random
 
 class Cache:
     '''
+    Author: Mac
     Parent class for DirectCache, AssociativeCache, and SetAssociativeCache
     Initialized with block size, cache size, and main memory size, must be in powers of two
     Each Cache Class has seperate logic for calculating cache hits and cache misses.
+    
     '''
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
 
@@ -55,6 +57,9 @@ class Cache:
         return self.replace_count
 
 class DirectCache(Cache):
+    '''
+    Author: Mac
+    '''
     def __init__(self, block_size: int, cache_size: int, memory_size: int):
         super(DirectCache, self).__init__(block_size, cache_size, memory_size)
         self.lines = [CacheLine() for _ in range(self.num_of_lines)]
@@ -86,6 +91,9 @@ class DirectCache(Cache):
 
 
 class AssociativeCache(Cache):
+    '''
+    Author: Mac
+    '''
     def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str):
         super(AssociativeCache, self).__init__(block_size, cache_size, memory_size)
         # makes a set of cachelines
@@ -103,6 +111,9 @@ class AssociativeCache(Cache):
         return page_number, hit
 
 class SetAssociativeCache(Cache):
+    '''
+    Author: Mac
+    '''
     def __init__(self, block_size: int, cache_size: int, memory_size: int, replacement_algorithm: str, set_size: int):
 
         super(SetAssociativeCache, self).__init__(block_size, cache_size, memory_size)

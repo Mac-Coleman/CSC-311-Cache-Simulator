@@ -10,6 +10,9 @@ import math
 import sys
 
 def simulate(options: OptionDict):
+    '''
+    Main Author: Mac
+    '''
     cache: Cache | None = None
 
     try:
