@@ -63,7 +63,11 @@ def simulate(options: OptionDict):
 
 
 
-    output_builder = OutputBuilder()
+    output_builder = None
+
+    if not options["output_disabled"]:
+        output_builder = OutputBuilder()
+
     hit_counter = 0
     total_counter = 0
 
@@ -86,8 +90,10 @@ def simulate(options: OptionDict):
             break
 
         page, hit = cache.read(address, i)
-        output_builder.add(address, hit)
-        locality[page] = locality.get(page, 0) + 1
+
+        if not options["output_disabled"] and output_builder is not None:
+            output_builder.add(address, hit)
+            locality[page] = locality.get(page, 0) + 1
 
         hit_counter += int(hit)
         total_counter += 1
@@ -162,6 +168,8 @@ def simulate(options: OptionDict):
     print(f"{total_counter / (end-start) : .02f} accesses per second")
     cursor.reset()
 
-    output_builder.close_output()
-    output_builder.write_locality_file(locality, page_length)
-    output_builder.write_stats_file(hit_counter, total_counter, replacements, options)
+
+    if not options["output_disabled"] and output_builder is not None:
+        output_builder.close_output()
+        output_builder.write_locality_file(locality, page_length)
+        output_builder.write_stats_file(hit_counter, total_counter, replacements, options)

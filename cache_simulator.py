@@ -5,13 +5,10 @@ Written by Mac
 """
 
 from cli_parser import parse_arguments, OptionDict
-from cache import Cache
 from simulator import simulate
 import ansi_terminal as cursor
 
 import sys
-import random
-import time
 from typing import cast
 
 program_name = "CacheSim"
@@ -29,6 +26,8 @@ help_string = f"\n{program_name} {version}\n\n" \
     "                                 default: 4KB\n" \
     " -c, --cache-size <size>         size of the cache\n" \
     "                                 default: 32KB\n" \
+    " -d, --disable-output-files      disables writing of output files hit_and_miss.txt,\n" \
+    "                                 stats.txt, and locality.txt\n" \
     " -h, --help                      display this help message\n" \
     " -k, --ways <set-size>           the size of each set in a set-associative cache\n" \
     " -m, --memory-size <size>        physical memory size\n" \

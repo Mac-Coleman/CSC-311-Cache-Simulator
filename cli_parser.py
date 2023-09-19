@@ -24,6 +24,7 @@ class OptionDict(TypedDict):
     access_pattern: str
     quiet: bool
     probability: float
+    output_disabled: bool
 
 number_help = "NUMBER INTERPRETATION:\n" \
     "\tNumbers can be passed on the command line as either\n" \
@@ -81,6 +82,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
     quiet = get_flag_presence(args, consumed, "--quiet", "-q")
+    disable_output = get_flag_presence(args, consumed, "--disable-output-files", "-d")
 
     # Unconsumed arguments are positionals.
     positionals: list[str] = []
@@ -227,7 +229,8 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         "replacement": replacement,
         "quiet": quiet,
         "access_pattern": access_pattern,
-        "probability": probability
+        "probability": probability,
+        "output_disabled": disable_output
     }
 
     if k_parsed is not None:
