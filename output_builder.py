@@ -1,3 +1,4 @@
+from cli_parser import OptionDict
 
 class OutputBuilder:
 
@@ -32,7 +33,7 @@ class OutputBuilder:
                 f.write("{0:0{width}x}: {1}\n".format(page, locality[page], width=page_length))
 
 
-    def write_stats_file(self, hits: int, total: int, replacements: int, options):
+    def write_stats_file(self, hits: int, total: int, replacements: int, options: OptionDict):
         """
         Outputs runtime statistics to the file `stats.txt`
         Written by Mac
@@ -44,6 +45,8 @@ class OutputBuilder:
             f.write(f"Accesses: {total}\n")
             f.write(f"Replacements: {replacements}\n")
             f.write(f"Cache Type: {options['cache_type']}\n")
+            if options['cache_type'] == "set-associative":
+                f.write(f"Set size: {options['k']}\n")
             f.write(f"Memory Size: {options['memory_size']}\n")
             f.write(f"Page Size: {options['block_size']}\n")
             f.write(f"Cache Size: {options['cache_size']}\n")
