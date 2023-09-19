@@ -50,9 +50,11 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     consumed = [False for element in range(len(args))]
     # Makes a list of bools to mark options as consumed.
+    # Unconsumed ones are positional arguments.
     file_name = args[0]
     consumed[0] = True
 
+    # Defaults defined here.
     memory_size = str_to_size("256MB")
     block_size = str_to_size("4KB")
     cache_size = str_to_size("32KB")
@@ -60,6 +62,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     access_pattern = "random"
     probability = 0.35
 
+    # Get -h or -v flags first
     run_help = get_flag_presence(args, consumed, "--help", "-h")
     run_version = get_flag_presence(args, consumed, "--version", "-v")
 
@@ -71,7 +74,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         version_handler(file_name)
         return
 
-
+    # Get remaining arguments
     try:
         memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
         block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
@@ -87,6 +90,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)
+        # Print an error if any were incorrectly specified.
 
     # Unconsumed arguments are positionals.
     positionals: list[str] = []
@@ -94,13 +98,14 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     count = 0
     for i in range(len(args)):
         if not consumed[i]:
-            positionals.append(args[i])
+            positionals.append(args[i]) # Read the unconsumed arguments into a list
         
             if count < 2:
                 consumed[i] = True
                 count += 1
     
     if len(positionals) != 2:
+        # Throw an error if there are too many unconsumed arguments
         print("Error: Cache simulator requires exactly two positional arguments.\n")
         print("Arguments:")
         print("\tTYPE    The type of cache mapping to use.")
@@ -109,7 +114,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         sys.exit(1)
 
 
-
+    # Make sure that these values can be turned into integers
     if memory_size_parsed:
         try:
             memory_size = str_to_size(memory_size_parsed)
@@ -137,6 +142,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     cache_type = positionals[0].lower()
     reads = 0
     
+    # Make sure that the number of reads can be correctly interpreted.
     try:
         reads = str_to_size(positionals[1])
     except ValueError as e:
@@ -148,6 +154,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         print(number_help)
         sys.exit(1)
 
+    # Used to get the right type of cache and allow multiple different shortcuts
     type_dict: dict[str, str] = {
         "direct": "direct",
         "d": "direct",
@@ -161,6 +168,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         "3": "set-associative"
     }
 
+    # Do error checking for cache_types and required arguments
     try:
         cache_type = type_dict[cache_type]
     except KeyError:
@@ -184,6 +192,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     
     replacement_types = ["lru", "lfu", "fifo", "random"]
     
+    # Check that replacement algorithm is valid
     if replacement_parsed is not None:
         if replacement_parsed.lower() in replacement_types:
             replacement = replacement_parsed.lower()
@@ -198,6 +207,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     
     access_patterns = ["random", "full-sequential", "random-pages", "probability", "random-sequential"]
 
+    # Check that access pattern is valid
     if access_pattern_parsed is not None:
         if access_pattern_parsed.lower() in access_patterns or access_pattern_parsed.lower().endswith(".log"):
             access_pattern = access_pattern_parsed.lower()
@@ -213,6 +223,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
             print("\t<file-name>\t\ta Valgrind Lackey .log file containing memory accesses by a process")
             sys.exit(1)
     
+    # Make sure that probability is set only when it needs to be
     if access_pattern == "probability" and probability_parsed is None:
         print("Error: probability was not provided.")
         print("When running with probability as the access mode, the --probability option must be specified.")
@@ -263,7 +274,9 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     run_handler(options)
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
-    
+    """
+    Retrives whether a flag was present in the list of arguments, and marks it as consumed if it is
+    """
 
     if long in args and (long_index := args.index(long)):
         consumed[long_index] = True
