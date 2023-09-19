@@ -159,11 +159,16 @@ class CacheLine:
 
 
 class CacheSet:
+    '''
+    Main Author: Brodie
+    Stores a set of CacheLine objects
+    Keeps track if the set is full
+    '''
     def __init__(self, lines, replacement_algorithm):
         self.length = lines
         self.lines = [CacheLine() for x in range(lines)]
         self.fifo_pointer = 0
-        self.next_available = 0
+        self.next_available = 0  # used for cold start
         self.is_full = False
         algo_dict = {
             "lru": self.replace_lru,
@@ -194,18 +199,18 @@ class CacheSet:
             self.is_full = self.next_available == self.length
             return hit, False
    
-
+    # Last Recently Used
     def replace_lru(self, tag: int) -> CacheLine:
         line = min(self.lines, key=attrgetter("access_time"))
         line.tag = tag
         return line
-
+    # Last Frequently Used
     def replace_lfu(self, tag: int) -> CacheLine:
         line = min(self.lines, key=attrgetter("access_count"))
         line.tag = tag
         line.access_count = 0  # been accessed one time
         return line
-
+    # First in First Out
     def replace_fifo(self, tag: int) -> CacheLine:
         line = self.lines[self.fifo_pointer]
         line.tag = tag
@@ -214,7 +219,7 @@ class CacheSet:
             self.fifo_pointer = 0
 
         return line
-        
+    # Random
     def replace_random(self, tag: int) -> CacheLine:
         line = random.choice(self.lines)
         line.tag = tag
