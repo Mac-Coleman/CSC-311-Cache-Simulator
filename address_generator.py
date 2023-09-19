@@ -28,7 +28,7 @@ class AddressGenerator:
     def get_random_page(self):
         return random.randint(0, self.max_size//self.page_size-1)*self.page_size
     
-    def set_probability(self,prob: int):
+    def set_probability(self, prob: float):
         self.probability = prob
 
     #different algorithms for generating input patterns 

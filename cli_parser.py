@@ -23,6 +23,7 @@ class OptionDict(TypedDict):
     replacement: str
     access_pattern: str
     quiet: bool
+    probability: float
 
 number_help = "NUMBER INTERPRETATION:\n" \
     "\tNumbers can be passed on the command line as either\n" \
@@ -56,6 +57,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     cache_size = "32KB"
     replacement = "lru"
     access_pattern = "random"
+    probability = 0.35
 
     run_help = get_flag_presence(args, consumed, "--help", "-h")
     run_version = get_flag_presence(args, consumed, "--version", "-v")
@@ -75,6 +77,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     k_parsed = get_option_value(args, consumed, "--ways", "-k")
     replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
     access_pattern_parsed = get_option_value(args, consumed, "--access-pattern", "-a")
+    probability_parsed = get_option_value(args, consumed, "--probability", "-p")
 
     no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
     quiet = get_flag_presence(args, consumed, "--quiet", "-q")
@@ -171,7 +174,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
             print("\trandom\trandom")
             sys.exit(1)
     
-    access_patterns = ["random", "full-sequential", "random-pages"]
+    access_patterns = ["random", "full-sequential", "random-pages", "probability", "random-sequential"]
 
     if access_pattern_parsed is not None:
         if access_pattern_parsed.lower() in access_patterns or access_pattern_parsed.lower().endswith(".log"):
@@ -179,10 +182,36 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         else:
             print(f"Error: access pattern unrecognized: '{access_pattern_parsed}'\n")
             print("ACCESS PATTERNS:")
-            print("\trandom\tgenerate random addresses within memory")
-            print("\tfull-sequential\tread the entire address space sequentially")
-            print("\trandom-pages\tread the address space of randomly selected pages")
-            print("\t<file-name>\ta Valgrind Lackey .log file containing memory accesses by a process")
+            print("\trandom\t\t\tgenerate random addresses within memory")
+            print("\tfull-sequential\t\tread the entire address space sequentially")
+            print("\trandom-sequential\tread from a random address to a random address sequentially")
+            print("\trandom-pages\t\tread the address space of randomly selected pages")
+            print("\tprobability\t\tread the memory with a certain probability of switching pages")
+            print("\t\t\t\trequires the --probability option.")
+            print("\t<file-name>\t\ta Valgrind Lackey .log file containing memory accesses by a process")
+            sys.exit(1)
+    
+    if access_pattern == "probability" and probability_parsed is None:
+        print("Error: probability was not provided.")
+        print("When running with probability as the access mode, the --probability option must be specified.")
+        print("Add the probability option or choose a different access pattern.")
+        sys.exit(1)
+    
+    if access_pattern != "probability" and probability_parsed is not None:
+        print("Error: probability was provided but access pattern does not support probability.")
+        print("The --probability or -p option may not be specified with this access pattern.")
+        print("Remove the probability option or choose a different access pattern.")
+        sys.exit(1)
+
+    if probability_parsed is not None:
+        try:
+            probability = float(probability_parsed)
+        except ValueError:
+            print("Error: Probability must be a floating-point number between one and zero.")
+            sys.exit(1)
+        
+        if probability < 0 or probability > 1:
+            print("Error: Probability must be a floating-point number between one and zero.")
             sys.exit(1)
 
     check_unconsumed(args, consumed)
@@ -197,7 +226,8 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         "k": 0,
         "replacement": replacement,
         "quiet": quiet,
-        "access_pattern": access_pattern
+        "access_pattern": access_pattern,
+        "probability": probability
     }
 
     if k_parsed is not None:

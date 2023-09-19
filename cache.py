@@ -197,16 +197,22 @@ class CacheSet:
         hit = tag in self.lines
         if hit:
             chosen_line = self.lines[self.lines.index(tag)]
+            chosen_line.access_time = time
+            chosen_line.access_count += 1
             return hit, False
         
         # Section for Cache miss / Replacement
         if self.is_full:
-            chosen_line = self.replacement_algorithm(tag)
+            replaced_line = self.replacement_algorithm(tag)
+            replaced_line.access_time = time
+            replaced_line.access_count += 1
             return hit, True
         else:
-            chosen_line = self.lines[self.next_available]
-            chosen_line.valid = True
+            next_line = self.lines[self.next_available]
+            next_line.valid = True
+            next_line.access_count += 1
             self.next_available += 1
+            next_line.access_time = time
             self.is_full = self.next_available == self.length
             return hit, False
    
