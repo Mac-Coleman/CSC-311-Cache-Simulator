@@ -8,10 +8,11 @@ Changes to bitwise operations by Mac
 
 from dataclasses import dataclass
 from operator import attrgetter
+from abc import ABC, abstractmethod
 import math
 import random
 
-class Cache:
+class Cache(ABC):
     '''
     Author: Mac
     Parent class for DirectCache, AssociativeCache, and SetAssociativeCache
@@ -45,6 +46,7 @@ class Cache:
 
         self.offset_length = int(math.log(block_size, 2))
     
+    @abstractmethod
     def read(self, address: int, time: int) -> tuple[int, bool]:
         pass
 

@@ -102,10 +102,11 @@ def simulate(options: OptionDict):
             cursor.reset()
             print(f"\thit ratio: {hit_counter/total_counter * 100 :0.2f}%")
 
+            p = math.ceil(i/reads * 20)
             cursor.erase()
             print("[", end="")
             cursor.yellow()
-            print(f"{'='*math.ceil(i/reads * 20)}{' '*math.floor((1 - (i/reads)) * 20)}", end="")
+            print(f"{'='*p}{' '*(20-p)}", end="")
             cursor.reset()
             print(f"] Progress: {i/reads * 100:0.2f}%", end="\n")
     
