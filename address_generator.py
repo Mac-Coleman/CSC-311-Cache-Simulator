@@ -110,18 +110,3 @@ class AddressTraceGenerator(AddressGenerator):
                     return int(line.split(" ")[2].split(",")[0], 16) & self.address_bitmask
                 except:
                     pass
-                    #print("bad input, ignoring "+line)
-                    # doesnt exit, trys to keep going and ignore the bad input
-        if(line1 is not None):
-            intLine=int(line1,16)
-            if(intLine>self.memory_size):
-                if(self.wrap_addresses):
-                    return intLine%self.memory_size
-                else:
-                    print("Invalid Memory Line: "+str(intLine))
-                    sys.exit(1)
-            else:
-                return intLine
-        else:
-            print("Line not found")
-            sys.exit(1)

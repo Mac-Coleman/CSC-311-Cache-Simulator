@@ -82,7 +82,7 @@ def simulate(options: OptionDict):
 
     start = time.perf_counter()
 
-    for i in range(options["reads"]):
+    for i in range(reads):
 
         try:
             address = address_maker.generate_address()

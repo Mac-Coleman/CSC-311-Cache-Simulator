@@ -72,17 +72,21 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         return
 
 
-    memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
-    block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
-    cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
-    k_parsed = get_option_value(args, consumed, "--ways", "-k")
-    replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
-    access_pattern_parsed = get_option_value(args, consumed, "--access-pattern", "-a")
-    probability_parsed = get_option_value(args, consumed, "--probability", "-p")
+    try:
+        memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
+        block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
+        cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
+        k_parsed = get_option_value(args, consumed, "--ways", "-k")
+        replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
+        access_pattern_parsed = get_option_value(args, consumed, "--access-pattern", "-a")
+        probability_parsed = get_option_value(args, consumed, "--probability", "-p")
 
-    no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
-    quiet = get_flag_presence(args, consumed, "--quiet", "-q")
-    disable_output = get_flag_presence(args, consumed, "--disable-output-files", "-d")
+        no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
+        quiet = get_flag_presence(args, consumed, "--quiet", "-q")
+        disable_output = get_flag_presence(args, consumed, "--disable-output-files", "-d")
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     # Unconsumed arguments are positionals.
     positionals: list[str] = []
@@ -101,6 +105,7 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         print("Arguments:")
         print("\tTYPE    The type of cache mapping to use.")
         print("\tREADS   The number of reads to perform.")
+        print("Run again with the -h or --help options to learn more.")
         sys.exit(1)
 
 
