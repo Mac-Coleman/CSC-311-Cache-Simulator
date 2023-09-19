@@ -30,7 +30,7 @@ Optional Arguments:
   -n, --no-color                  disable colored output
   -q, --quiet                     suppress progress display
   -p, --probability               set probability of next address being generated
-                                  in a new page than the previous address.
+                                  in the same page as the previous address.
   -r, --replacement <algorithm>   replacement algorithm to use in caches with associativity
                                   default: least recently used
   -v, --version                   display version
@@ -39,11 +39,11 @@ EXAMPLES:
     python cache_simulator.py direct 1M
         simulates 1M memory accesses on a cache with default settings
     python cache_simulator.py associative 3K -m 1G -c 512K -b 2K
-        simulates 3M memory accesses on 1 gigabyte of physical memory on a 512-kilobyte cache with 2-kilobyte block_size
+        simulates 3K memory accesses on 1 gigabyte of physical memory on a 512-kilobyte cache with 2-kilobyte block_size
     python cache_simulator.py set-associative -k 4 150
-        simulates 150 memory accesses on a 4-way set-associative cache with default setting
+        simulates 150 memory accesses on a 4-way set-associative cache with default settings
     python cache_simulator.py associative 1M -r fifo
-        simulates one million accesses on a associative cache using the fifo replacement_algorithm
+        simulates one million accesses on an associative cache using the fifo replacement_algorithm
     python cache_simulator.py direct 250K --access-pattern=random-pages
         simulate 250 thousand accesses on a direct cache with default settings using the random-pages access pattern
     python cache_simulator.py set-associative 100 -k 2 -a probability -p 0.3
@@ -109,6 +109,6 @@ Output Files:
         number of reads, and information relating to the type of cache system that was simulated.
 
 Errors:
-    Errors that we have determined are incompatible with continuing the program will immediately cause the program to exit.
+    Errors that can not be resolved will immediately cause the program to exit.
     Errors which can be corrected or ignored will allow the program to continue.
     For example, trace files containing invalid lines will simply have their invalid lines ignored.
