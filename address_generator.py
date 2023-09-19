@@ -80,7 +80,7 @@ class AddressTraceGenerator(AddressGenerator):
         self.file=None
         self.open_file()
 
-        self.address_bitmask = math.ceil(math.log(memory_size, 2)) - 1
+        self.address_bitmask = 2**math.ceil(math.log(memory_size, 2)) - 1
         """
         Opens file 'file_name' and read it line by line.
         Get the address from each line, ignore lines starting with "--" or "=="
