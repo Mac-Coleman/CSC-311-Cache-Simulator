@@ -185,7 +185,7 @@ class CacheSet:
             "lru": self.replace_lru,
             "lfu" : self.replace_lfu,
             "fifo": self.replace_fifo,
-            "random": self.replace_fifo
+            "random": self.replace_random
         }
         self.replacement_algorithm = algo_dict[replacement_algorithm]
     
@@ -219,7 +219,7 @@ class CacheSet:
     def replace_lfu(self, tag: int) -> CacheLine:
         line = min(self.lines, key=attrgetter("access_count"))
         line.tag = tag
-        line.access_count = 0  # been accessed one time
+        line.access_count = 0
         return line
     # First in First Out
     def replace_fifo(self, tag: int) -> CacheLine:
