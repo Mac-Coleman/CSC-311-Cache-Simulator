@@ -32,10 +32,10 @@ class AddressGenerator:
         self.probability = prob
 
     #different algorithms for generating input patterns 
-    def random(self):
+    def random(self):# random adress through the entire RAM
         return random.randint(0, self.max_size-1)
     
-    def read_full_page(self):
+    def read_full_page(self):#reads an entire page, then finds anoher random page
         if(self.pointer == self.limit):
             self.pointer = self.get_random_page()
             self.limit = self.pointer + self.page_size-1
@@ -43,7 +43,7 @@ class AddressGenerator:
             self.pointer += 1
         return self.pointer
     
-    def random_sequential(self):
+    def random_sequential(self):#Reads a random section of RAM sequentially, then finds a new section
         if(self.pointer == self.limit):
             self.pointer = random.randint(0, self.max_size-1)
             self.limit=random.randint(self.pointer, self.max_size-1)
@@ -52,7 +52,7 @@ class AddressGenerator:
 
         return self.pointer
     
-    def full_ram_sequential(self):
+    def full_ram_sequential(self):#reads the entire RAM sequentially
         if(self.pointer == self.limit):
             self.pointer = 0
             self.limit = self.max_size-1
@@ -61,7 +61,8 @@ class AddressGenerator:
 
         return self.pointer
     
-    def probability_based_locality(self):
+    def probability_based_locality(self):# start at a random point on a random page, and there is a (probability)% chance that 
+                                        #you remain on that page for the next read
         if(self.pointer==self.limit):
             self.pointer=self.get_random_page()
             self.limit=-1# this is the case for the first call only, to stop the first page usually being 0
@@ -70,7 +71,7 @@ class AddressGenerator:
                 self.pointer=self.get_random_page()
         return random.randint(self.pointer,self.pointer+self.page_size-1)
 
-class AddressTraceGenerator(AddressGenerator):
+class AddressTraceGenerator(AddressGenerator):# a seperate generator class to allow reading from a trace file
     def __init__(self, file_name: str, memory_size: int, wrap_addresses: bool, max_length: int):
 
         self.file_name=file_name
@@ -110,3 +111,4 @@ class AddressTraceGenerator(AddressGenerator):
                     return int(line.split(" ")[2].split(",")[0], 16) & self.address_bitmask
                 except:
                     pass
+               
