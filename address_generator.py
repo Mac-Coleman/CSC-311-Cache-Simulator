@@ -125,11 +125,3 @@ class AddressTraceGenerator(AddressGenerator):
         else:
             print("Line not found")
             sys.exit(1)
-                
-            
-
-if __name__=="__main__":
-    ag=AddressTraceGenerator("./traces/hello_world.log",8096,False,600)
-    print(ag.generate_address())
-    print(ag.generate_address())    
-    print(ag.generate_address())
