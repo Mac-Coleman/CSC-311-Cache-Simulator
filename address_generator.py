@@ -109,7 +109,8 @@ class AddressTraceGenerator(AddressGenerator):
                 try:
                     return int(line.split(" ")[2].split(",")[0], 16) & self.address_bitmask
                 except:
-                    print("bad input, ignoring "+line)
+                    pass
+                    #print("bad input, ignoring "+line)
                     # doesnt exit, trys to keep going and ignore the bad input
         if(line1 is not None):
             intLine=int(line1,16)
