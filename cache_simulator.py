@@ -1,6 +1,7 @@
 """
 The top-level organization for the main program logic.
 This will orchestrate the simulator and its components.
+Written by Mac
 """
 
 from cli_parser import parse_arguments, OptionDict

@@ -32,7 +32,7 @@ class OutputBuilder:
                 f.write("{0:0{width}x}: {1}\n".format(page, locality[page], width=page_length))
 
 
-    def write_stats_file(self, hits: int, total: int, replacements: int):
+    def write_stats_file(self, hits: int, total: int, replacements: int, options):
         """
         Outputs runtime statistics to the file `stats.txt`
         Written by Mac
@@ -43,13 +43,18 @@ class OutputBuilder:
             f.write(f"Misses: {total - hits}\n")
             f.write(f"Accesses: {total}\n")
             f.write(f"Replacements: {replacements}\n")
+            f.write(f"Cache Type: {options['cache_type']}\n")
+            f.write(f"Memory Size: {options['memory_size']}\n")
+            f.write(f"Page Size: {options['block_size']}\n")
+            f.write(f"Cache Size: {options['cache_size']}\n")
+            f.write(f"Access Pattern: {options['access_pattern']}\n")
     
     ### Writes a new line to the file
-    def add(self, index, result):
+    def add(self, address: int, result: bool):
         """
         Written by Brodie
         """
         if result:
-            self.output_file.write("{0:x} {1}\n".format(index, "hit"))
+            self.output_file.write("{0:x} {1}\n".format(address, "hit"))
         else:
-            self.output_file.write("{0:x} {1}\n".format(index, "miss"))
+            self.output_file.write("{0:x} {1}\n".format(address, "miss"))

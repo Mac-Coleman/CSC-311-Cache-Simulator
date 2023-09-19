@@ -80,7 +80,7 @@ def simulate(options: OptionDict):
             break
 
         page, hit = cache.read(address, i)
-        #output_builder.add(i, hit)
+        # output_builder.add(address, hit)
         locality[page] = locality.get(page, 0) + 1
 
         hit_counter += int(hit)
@@ -156,4 +156,4 @@ def simulate(options: OptionDict):
 
     output_builder.close_output()
     output_builder.write_locality_file(locality, page_length)
-    output_builder.write_stats_file(hit_counter, total_counter, replacements)
+    output_builder.write_stats_file(hit_counter, total_counter, replacements, options)
