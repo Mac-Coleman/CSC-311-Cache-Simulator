@@ -68,7 +68,8 @@ def simulate(options: OptionDict):
     locality: dict[int, int] = {}
     reads = options["reads"]
 
-    print("\n\n")
+    if not options["quiet"]:
+        print("\n\n")
 
     start = time.perf_counter()
 
@@ -86,7 +87,7 @@ def simulate(options: OptionDict):
         hit_counter += int(hit)
         total_counter += 1
 
-        if i % 32768 == 0:
+        if not options["quiet"] and i % 32768 == 0:
             cursor.move_up()
             cursor.move_up()
             cursor.erase()
@@ -105,21 +106,22 @@ def simulate(options: OptionDict):
     
     end = time.perf_counter()
     
-    cursor.move_up()
-    cursor.move_up()
-    cursor.erase()
-    print("\rA: {a:0{width}x}\t  ".format(a=address, width=address_length), end="")
-    cursor.green() if hit else cursor.red()
-    print(f"{'hit ' if hit else 'miss'}", end="")
-    cursor.reset()
-    print(f"\thit ratio: {hit_counter/total_counter * 100 :0.2f}%")
-    
-    cursor.erase()
-    print("[", end="")
-    cursor.green()
-    print(f"{'='*20}", end="")
-    cursor.reset()
-    print(f"] Progress: Finished!", end="\n")
+    if not options["quiet"]:
+        cursor.move_up()
+        cursor.move_up()
+        cursor.erase()
+        print("\rA: {a:0{width}x}\t  ".format(a=address, width=address_length), end="")
+        cursor.green() if hit else cursor.red()
+        print(f"{'hit ' if hit else 'miss'}", end="")
+        cursor.reset()
+        print(f"\thit ratio: {hit_counter/total_counter * 100 :0.2f}%")
+        
+        cursor.erase()
+        print("[", end="")
+        cursor.green()
+        print(f"{'='*20}", end="")
+        cursor.reset()
+        print(f"] Progress: Finished!", end="\n")
 
     hit_ratio = hit_counter / total_counter
     replacements = cache.get_replacement_count()
