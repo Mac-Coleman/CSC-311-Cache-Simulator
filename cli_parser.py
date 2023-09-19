@@ -53,9 +53,9 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     file_name = args[0]
     consumed[0] = True
 
-    memory_size = "256MB"
-    block_size = "4KB"
-    cache_size = "32KB"
+    memory_size = str_to_size("256MB")
+    block_size = str_to_size("4KB")
+    cache_size = str_to_size("32KB")
     replacement = "lru"
     access_pattern = "random"
     probability = 0.35
@@ -106,13 +106,28 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
 
     if memory_size_parsed:
-        memory_size = memory_size_parsed
+        try:
+            memory_size = str_to_size(memory_size_parsed)
+        except:
+            print("Error: Could not correctly interpret memory size.\n")
+            print(number_help)
+            sys.exit(1)
     
     if block_size_parsed:
-        block_size = block_size_parsed
+        try:
+            block_size = str_to_size(block_size_parsed)
+        except:
+            print("Error: Could not correctly interpret block size.\n")
+            print(number_help)
+            sys.exit(1)
     
     if cache_size_parsed:
-        cache_size = cache_size_parsed
+        try:
+            cache_size = str_to_size(cache_size_parsed)
+        except:
+            print("Error: Could not correctly interpret cache size.\n")
+            print(number_help)
+            sys.exit(1)
 
     cache_type = positionals[0].lower()
     reads = 0
@@ -220,9 +235,9 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     options: OptionDict = {
         "cache_type": cache_type,
-        "memory_size": str_to_size(memory_size),
-        "block_size": str_to_size(block_size),
-        "cache_size": str_to_size(cache_size),
+        "memory_size": memory_size,
+        "block_size": block_size,
+        "cache_size": cache_size,
         "reads": reads,
         "no_color": no_colorize,
         "k": 0,
@@ -234,7 +249,11 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
     }
 
     if k_parsed is not None:
-        options["k"] = int(k_parsed)
+        try:
+            options["k"] = int(k_parsed)
+        except ValueError:
+            print("Error: Set size could not be interpreted as an integer.")
+            sys.exit(1)
 
     run_handler(options)
 
