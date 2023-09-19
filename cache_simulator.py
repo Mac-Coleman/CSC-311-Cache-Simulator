@@ -1,11 +1,15 @@
 """
 The top-level organization for the main program logic.
 This will orchestrate the simulator and its components.
+Written by Mac
 """
 
-from cli_parser import parse_arguments
+from cli_parser import parse_arguments, OptionDict
+from simulator import simulate
+import ansi_terminal as cursor
 
 import sys
+from typing import cast
 
 program_name = "CacheSim"
 version = "0.0.1"
@@ -16,14 +20,26 @@ help_string = f"\n{program_name} {version}\n\n" \
     "  python {executing_file_name} [options] <cache-type> <reads>\n\n" \
     "Simulate reads and writes to a cache.\n\n" \
     "Options:\n" \
-    " -b, --block-size <size>  block, page, frame, line size\n" \
-    "                          default: 4KB\n" \
-    " -c, --cache-size <size>  size of the cache\n" \
-    "                          default: 32KB\n" \
-    " -h, --help               display this help message\n" \
-    " -m, --memory-size <size> physical memory size\n" \
-    "                          default: 256MB\n" \
-    " -v, --version            display version\n" \
+    " -a, --access-pattern <pattern>  the access pattern to use\n" \
+    "                                 can be a path to a Valgrind Lackey trace file\n" \
+    " -b, --block-size <size>         block, page, frame, line size\n" \
+    "                                 default: 4KB\n" \
+    " -c, --cache-size <size>         size of the cache\n" \
+    "                                 default: 32KB\n" \
+    " -d, --disable-output-files      disables writing of output files hit_and_miss.txt,\n" \
+    "                                 stats.txt, and locality.txt\n" \
+    " -h, --help                      display this help message\n" \
+    " -k, --ways <set-size>           the size of each set in a set-associative cache\n" \
+    " -m, --memory-size <size>        physical memory size\n" \
+    "                                 default: 256MB\n" \
+    " -n, --no-color                  disable colored output\n" \
+    " -q, --quiet                     suppress progress display\n" \
+    " -p, --probability               set probability of next address being generated\n" \
+    "                                 in a new page than the previous address.\n" \
+    "                                 default: 2" \
+    " -r, --replacement <algorithm>   replacement algorithm to use in caches with associativity\n" \
+    "                                 default: least recently used\n" \
+    " -v, --version                   display version\n" \
     
 
 def main():
@@ -35,8 +51,16 @@ def run_version(executing_file: str):
 def run_help(executing_file: str):
     print(help_string.format(executing_file_name=executing_file))
 
-def run_simulator(options: dict[str, int]):
-    print(options)
+def run_simulator(options: OptionDict):
+    try:
+        cursor.setup(cast(bool, options["no_color"]))
+        simulate(options)
+    except KeyboardInterrupt:
+        cursor.erase()
+        cursor.red()
+        print("Simulation canceled!")
+        cursor.reset()
+
 
 
 if __name__ == "__main__":

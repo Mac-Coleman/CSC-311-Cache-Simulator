@@ -1,12 +1,41 @@
+"""
+Written by Mac
+"""
+
 from enum import Enum
 import sys
-from typing import Callable
+from typing import cast, Callable, TypedDict
 
 class OptionFormat(Enum):
     COMBINED_SHORT = 0
     COMBINED_LONG = 1
     SEPARATE_SHORT = 2
     SEPARATE_LONG = 3
+
+class OptionDict(TypedDict):
+    cache_type: str
+    memory_size: int
+    block_size: int
+    cache_size: int
+    reads: int
+    no_color: bool
+    k: int
+    replacement: str
+    access_pattern: str
+    quiet: bool
+    probability: float
+    output_disabled: bool
+
+number_help = "NUMBER INTERPRETATION:\n" \
+    "\tNumbers can be passed on the command line as either\n" \
+    "\tinteger literals or with SI multipliers. You can\n" \
+    "\tspecify a number by writing out all of its digits,\n" \
+    "\tor by writing a number with a multiplier suffix.\n\n" \
+    "EXAMPLES:\n" \
+    "\t256  -> 256\n" \
+    "\t512B -> 512\n" \
+    "\t256K -> 262144\n" \
+    "\t  1G -> 1073741823\n"
 
 def parse_arguments(args: list[str], help_handler: Callable, version_handler: Callable, run_handler: Callable):
 
@@ -21,13 +50,19 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
 
     consumed = [False for element in range(len(args))]
     # Makes a list of bools to mark options as consumed.
+    # Unconsumed ones are positional arguments.
     file_name = args[0]
     consumed[0] = True
 
-    memory_size = "256MB"
-    block_size = "4KB"
-    cache_size = "32KB"
+    # Defaults defined here.
+    memory_size = str_to_size("256MB")
+    block_size = str_to_size("4KB")
+    cache_size = str_to_size("32KB")
+    replacement = "lru"
+    access_pattern = "random"
+    probability = 0.35
 
+    # Get -h or -v flags first
     run_help = get_flag_presence(args, consumed, "--help", "-h")
     run_version = get_flag_presence(args, consumed, "--version", "-v")
 
@@ -39,31 +74,209 @@ def parse_arguments(args: list[str], help_handler: Callable, version_handler: Ca
         version_handler(file_name)
         return
 
+    # Get remaining arguments
+    try:
+        memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
+        block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
+        cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
+        k_parsed = get_option_value(args, consumed, "--ways", "-k")
+        replacement_parsed = get_option_value(args, consumed, "--replacement", "-r")
+        access_pattern_parsed = get_option_value(args, consumed, "--access-pattern", "-a")
+        probability_parsed = get_option_value(args, consumed, "--probability", "-p")
 
-    memory_size_parsed = get_option_value(args, consumed, "--memory-size", "-m")
-    block_size_parsed = get_option_value(args, consumed, "--block-size", "-b")
-    cache_size_parsed = get_option_value(args, consumed, "--cache-size", "-c")
+        no_colorize = get_flag_presence(args, consumed, "--no-color", "-n")
+        quiet = get_flag_presence(args, consumed, "--quiet", "-q")
+        disable_output = get_flag_presence(args, consumed, "--disable-output-files", "-d")
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+        # Print an error if any were incorrectly specified.
 
+    # Unconsumed arguments are positionals.
+    positionals: list[str] = []
+
+    count = 0
+    for i in range(len(args)):
+        if not consumed[i]:
+            positionals.append(args[i]) # Read the unconsumed arguments into a list
+        
+            if count < 2:
+                consumed[i] = True
+                count += 1
+    
+    if len(positionals) != 2:
+        # Throw an error if there are too many unconsumed arguments
+        print("Error: Cache simulator requires exactly two positional arguments.\n")
+        print("Arguments:")
+        print("\tTYPE    The type of cache mapping to use.")
+        print("\tREADS   The number of reads to perform.")
+        print("Run again with the -h or --help options to learn more.")
+        sys.exit(1)
+
+
+    # Make sure that these values can be turned into integers
     if memory_size_parsed:
-        memory_size = memory_size_parsed
+        try:
+            memory_size = str_to_size(memory_size_parsed)
+        except:
+            print("Error: Could not correctly interpret memory size.\n")
+            print(number_help)
+            sys.exit(1)
     
     if block_size_parsed:
-        block_size = block_size_parsed
+        try:
+            block_size = str_to_size(block_size_parsed)
+        except:
+            print("Error: Could not correctly interpret block size.\n")
+            print(number_help)
+            sys.exit(1)
     
     if cache_size_parsed:
-        cache_size = cache_size_parsed
+        try:
+            cache_size = str_to_size(cache_size_parsed)
+        except:
+            print("Error: Could not correctly interpret cache size.\n")
+            print(number_help)
+            sys.exit(1)
+
+    cache_type = positionals[0].lower()
+    reads = 0
+    
+    # Make sure that the number of reads can be correctly interpreted.
+    try:
+        reads = str_to_size(positionals[1])
+    except ValueError as e:
+        print(f"Error: could not interpret number of reads: {positionals[1]}")
+        print(number_help)
+        sys.exit(1)
+    except KeyError as e:
+        print(f"Error: could not interpret number of reads: {positionals[1]}")
+        print(number_help)
+        sys.exit(1)
+
+    # Used to get the right type of cache and allow multiple different shortcuts
+    type_dict: dict[str, str] = {
+        "direct": "direct",
+        "d": "direct",
+        "1": "direct",
+        "associative": "associative",
+        "a": "associative",
+        "2": "associative",
+        "set-associative": "set-associative",
+        "set_associative": "set-associative",
+        "s": "set-associative",
+        "3": "set-associative"
+    }
+
+    # Do error checking for cache_types and required arguments
+    try:
+        cache_type = type_dict[cache_type]
+    except KeyError:
+        print(f"Error: Unrecognized cache type: {cache_type}")
+        sys.exit(1)
+    
+    if cache_type != "set-associative" and k_parsed is not None:
+        print("Error: set size can only be specified for set-associative caches!")
+        print("You must remove the --ways or -k options, or switch to a different cache type.")
+        sys.exit(1)
+    
+    if cache_type == "set-associative" and k_parsed is None:
+        print("Error: set size is required when using a set-associative cache!")
+        print("You must add the --ways or -k flag, or switch to a different type of cache.")
+        sys.exit(1)
+    
+    if replacement_parsed is not None and cache_type == "direct":
+        print("Error: No replacement algorithm can be specified when using a direct cache!")
+        print("You must remove the -r or --replacement options, or switch to a different cache type.")
+        sys.exit(1)
+    
+    replacement_types = ["lru", "lfu", "fifo", "random"]
+    
+    # Check that replacement algorithm is valid
+    if replacement_parsed is not None:
+        if replacement_parsed.lower() in replacement_types:
+            replacement = replacement_parsed.lower()
+        else:
+            print(f"Error: Replacement algorithm unrecognized: '{replacement_parsed}'\n")
+            print("REPLACEMENT ALGORITHMS:")
+            print("\tlru\tleast recently used")
+            print("\tlfu\tleast frequently used")
+            print("\tfifo\tfirst in first out")
+            print("\trandom\trandom")
+            sys.exit(1)
+    
+    access_patterns = ["random", "full-sequential", "random-pages", "probability", "random-sequential"]
+
+    # Check that access pattern is valid
+    if access_pattern_parsed is not None:
+        if access_pattern_parsed.lower() in access_patterns or access_pattern_parsed.lower().endswith(".log"):
+            access_pattern = access_pattern_parsed.lower()
+        else:
+            print(f"Error: access pattern unrecognized: '{access_pattern_parsed}'\n")
+            print("ACCESS PATTERNS:")
+            print("\trandom\t\t\tgenerate random addresses within memory")
+            print("\tfull-sequential\t\tread the entire address space sequentially")
+            print("\trandom-sequential\tread from a random address to a random address sequentially")
+            print("\trandom-pages\t\tread the address space of randomly selected pages")
+            print("\tprobability\t\tread the memory with a certain probability of switching pages")
+            print("\t\t\t\trequires the --probability option.")
+            print("\t<file-name>\t\ta Valgrind Lackey .log file containing memory accesses by a process")
+            sys.exit(1)
+    
+    # Make sure that probability is set only when it needs to be
+    if access_pattern == "probability" and probability_parsed is None:
+        print("Error: probability was not provided.")
+        print("When running with probability as the access mode, the --probability option must be specified.")
+        print("Add the probability option or choose a different access pattern.")
+        sys.exit(1)
+    
+    if access_pattern != "probability" and probability_parsed is not None:
+        print("Error: probability was provided but access pattern does not support probability.")
+        print("The --probability or -p option may not be specified with this access pattern.")
+        print("Remove the probability option or choose a different access pattern.")
+        sys.exit(1)
+
+    if probability_parsed is not None:
+        try:
+            probability = float(probability_parsed)
+        except ValueError:
+            print("Error: Probability must be a floating-point number between one and zero.")
+            sys.exit(1)
+        
+        if probability < 0 or probability > 1:
+            print("Error: Probability must be a floating-point number between one and zero.")
+            sys.exit(1)
 
     check_unconsumed(args, consumed)
 
-    options: dict[str, int] = {
-        "memory_size": str_to_size(memory_size),
-        "block_size": str_to_size(block_size),
-        "cache_size": str_to_size(cache_size),
+    options: OptionDict = {
+        "cache_type": cache_type,
+        "memory_size": memory_size,
+        "block_size": block_size,
+        "cache_size": cache_size,
+        "reads": reads,
+        "no_color": no_colorize,
+        "k": 0,
+        "replacement": replacement,
+        "quiet": quiet,
+        "access_pattern": access_pattern,
+        "probability": probability,
+        "output_disabled": disable_output
     }
+
+    if k_parsed is not None:
+        try:
+            options["k"] = int(k_parsed)
+        except ValueError:
+            print("Error: Set size could not be interpreted as an integer.")
+            sys.exit(1)
+
     run_handler(options)
 
 def get_flag_presence(args: list[str], consumed: list[bool], long: str, short: str) -> bool:
-    
+    """
+    Retrives whether a flag was present in the list of arguments, and marks it as consumed if it is
+    """
 
     if long in args and (long_index := args.index(long)):
         consumed[long_index] = True
@@ -80,7 +293,7 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     Retrieves the value for an option from a list. Returns None if not present.
     long: The long-form name of the option. (e.g. "--block-size")
     short: the short-form name of the option. (e.g. "-b")
-    Consumes elements from args by removing them when they are found.
+    Consumes elements from args by marking them as consumed when they are found.
     """
 
     option_style = get_option_index(args, long, short)
@@ -106,7 +319,7 @@ def get_option_value(args: list[str], consumed: list[bool], long: str, short: st
     
     index = option_style[1]+1
     if index >= len(args):
-        raise ValueError(f"Option {option_style[1]} was given but no value was specified.")
+        raise ValueError(f"Option {args[option_style[1]]} was given but no value was specified.")
     
     if consumed[index]:
         return None
@@ -152,7 +365,7 @@ def str_to_size(string: str) -> int:
     """
 
     if len(string) == 0:
-        raise ValueError()
+        raise ValueError("No value was found before the multiplier.")
 
     suffix_start: int = 0
 

@@ -161,3 +161,11 @@ cython_debug/
 
 # Visual Studio Code stuff
 .vscode/
+
+# Program output
+hit_and_miss.txt
+locality.txt
+stats.txt
+
+# Traces
+!traces/*.log
